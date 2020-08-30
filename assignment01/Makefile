@@ -4,19 +4,24 @@ all: FILENAME
 
 FILENAME.i : 
 	@echo "Pre-processing..."
-	gcc -E $(FILENAME).c > $(FILENAME).i
+	@gcc -E $(FILENAME).c > $(FILENAME).i
+	@read -p "Press enter to continue to the next stage of compilation" next_step;
 
 FILENAME.s : FILENAME.i 
 	@echo "Converting to Assembly Instructions(Compilation)..."
-	gcc -S $(FILENAME).i
+	@gcc -S $(FILENAME).i
+	@read -p "Press enter to continue to the next stage of compilation" next_step;
 
 FILENAME.o : FILENAME.s 
 	@echo "Converting to Object Code(Assembly)..."
-	gcc -c $(FILENAME).s
+	@gcc -c $(FILENAME).s
+	@read -p "Press enter to continue to the next stage of compilation" next_step;
 
 FILENAME : FILENAME.o 
 	@echo "Linking..."
-	gcc -o $(FILENAME) $(FILENAME).o
+	@gcc -o $(FILENAME) $(FILENAME).o
+	@echo "Compilation Finished!!!"
+	@echo "To run the program, execute: ./$(FILENAME)"
 
 showObject: 
 	@echo "Showing Object Code"
