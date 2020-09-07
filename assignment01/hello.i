@@ -5,6 +5,8 @@
 # 1 "/usr/include/stdc-predef.h" 1 3 4
 # 32 "<command-line>" 2
 # 1 "hello.c"
+
+
 # 1 "/usr/include/stdio.h" 1 3 4
 # 27 "/usr/include/stdio.h" 3 4
 # 1 "/usr/include/x86_64-linux-gnu/bits/libc-header-start.h" 1 3 4
@@ -722,14 +724,14 @@ extern int __uflow (FILE *);
 extern int __overflow (FILE *, int);
 # 873 "/usr/include/stdio.h" 3 4
 
-# 2 "hello.c" 2
+# 4 "hello.c" 2
 
 
-# 3 "hello.c"
+# 5 "hello.c"
 int main()
 {
     int a = 5;
     int c = 7;
-    printf("%d, %d", a, c);
+    printf("%d, %d\n", a, c);
     return 0;
 }

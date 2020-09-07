@@ -1,3 +1,5 @@
+# Written by Rohan Jain 2019095
+
 section .bss
 	MEM_DIGIT resb 100			; Reserve bytes to store character representation of Integer
 	MEM_DIGIT_CURR resb 8		;Reserve bytes to store address of current pointer to MEM_DIGIT

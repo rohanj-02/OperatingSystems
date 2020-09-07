@@ -1,3 +1,4 @@
+# Written by Rohan Jain 2019095
 FILENAME := hello
 
 all: FILENAME 
@@ -23,7 +24,7 @@ FILENAME : FILENAME.o
 	@echo "Compilation Finished!!!"
 	@echo "To run the program, execute: ./$(FILENAME)"
 
-showObject: 
+showObject: FILENAME.o
 	@echo "Showing Object Code"
 	od -c $(FILENAME).o
 
