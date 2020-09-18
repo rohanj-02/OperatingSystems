@@ -1,21 +1,34 @@
-section .bss           ;Uninitialized data
-	num resb 5
-	
+section .bss
+	printVal	resb	8
 section .text
-	global _start
+	global checkGreater, _start
+; x = 7, y = 2
+checkGreater:
+	cmp	rdi, rsi
+	jle	retZero
+	mov	rdx, 49
+	mov	rcx, printVal
+	mov	[rcx], dl
+	jmp	print
 
 _start:
-	mov	rax, 3
-	mov	rbx, 2
-	mov	rcx, num  
-	mov	rdx, 5
-	int	0x80
+	mov	rdi, 0
+	mov	rsi, 1
+	call	checkGreater
+	jmp 	print
+	;Print
+print:
+	mov	rax, 1
+	mov	rdi, 1
+	mov	rsi, printVal
+	mov	rdx, 1
+	syscall
+	mov	rax, 60
+	mov	rdi, 0
+	syscall
 
-	mov	rax, 4
-	mov	rbx, 1
-	mov	rcx, num
-	mov	rdx, 5
-	int	0x80
-	mov 	rax, 60	;System call for program end 
-	mov	rdi, 0	;Error code for program end
-	syscall 		;End program with exit code 0
+retZero:
+	mov	rdx, 48
+	mov	rcx, printVal
+	mov	[rcx], dl
+	jmp	print
