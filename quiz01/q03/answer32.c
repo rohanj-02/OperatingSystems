@@ -14,4 +14,8 @@ void main(){
         printf("%d ", *itr);
         itr++;
     }
+
+    if(x+64 == itr){
+        printf("True");
+    }
 }

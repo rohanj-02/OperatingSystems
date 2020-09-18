@@ -15,12 +15,8 @@ void main(){
         itr++;
     }
 
-    // if(x+64 == itr){
-    //     printf("True");
-    // }
-    // printf("%p", x + 64);
-    // printf("%p", itr);
-    // for(int i = 0; i < 64; i++){
-    //     printf("%d ", (int)x[i]);
-    // }
+    if(x+64 == itr){
+        printf("True");
+    }
+    
 }
