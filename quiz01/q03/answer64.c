@@ -7,7 +7,7 @@ void main(){
         *ptr = i;
         ptr++;
     }
-    long int i2 = 0x7FFFFFFFFFFFFFFF;
+    long int i2 = 0x7FFFFFFFFFFFFFFF;   //Highest 64 bit value to show 64 bit storage
     *ptr = i2;
     long int *itr = (long int*)x;
     for(int i = 0; i < 8; i++){
@@ -16,7 +16,7 @@ void main(){
     }
 
     if(x+64 == itr){
-        printf("True");
+        printf("True");         //To prove that storing on same address
     }
     
 }
