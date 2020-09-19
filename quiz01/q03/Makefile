@@ -5,3 +5,7 @@ default:
 default64:
 	gcc -o answer64 answer64.c
 	./answer64
+
+clean:
+	@echo  " Cleaning up ... " 
+	rm answer32 answer64

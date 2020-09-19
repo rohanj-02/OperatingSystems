@@ -2,7 +2,7 @@ section .bss
 	printVal	resb	8
 section .text
 	global checkGreater, _start
-; x = 7, y = 2
+
 checkGreater:
 	cmp	rdi, rsi
 	jle	retZero
@@ -12,8 +12,8 @@ checkGreater:
 	jmp	print
 
 _start:
-	mov	rdi, 0
-	mov	rsi, 1
+	mov	rdi, 29
+	mov	rsi, 102
 	call	checkGreater
 	jmp 	print
 	;Print

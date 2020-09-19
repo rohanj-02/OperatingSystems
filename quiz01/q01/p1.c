@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <inttypes.h>
 
 extern void checkGreater(int64_t, int64_t);
