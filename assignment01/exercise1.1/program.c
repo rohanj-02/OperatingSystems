@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -85,18 +86,35 @@ void parseCsv(char section)
 			printStudent(s);
 		}
 		count++;
-		if (count == 10)
-		{
-			break;
-		}
 		end = feof(fptr);
 	}
-	printf("%d", count);
 	fclose(fptr);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-	parseCsv('A');
+	pid_t process;
+	int status;
+	process = fork();
+	if (process == -1)
+	{
+		printf("Could not spawn child process");
+		exit(1);
+	}
+	if (process == 0)
+	{
+		printf("Child process running! PID is: %ld\n", (long)getpid());
+		parseCsv('A');
+		printf("Terminating Child Process! \n");
+		exit(0);
+	}
+	else
+	{
+		waitpid(-1, NULL, 0);
+		printf("Parent Process running! PID is: %ld\n", (long)getpid());
+		parseCsv('B');
+		printf("Terminating Parent Process! \n");
+		exit(0);
+	}
 	return 0;
 }
