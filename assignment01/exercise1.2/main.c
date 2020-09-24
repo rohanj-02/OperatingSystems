@@ -7,6 +7,10 @@
 #include <stdbool.h>
 
 int NUMBER_OF_ARGUMENTS = 10;
+char **HISTORY;
+int MAX_HISTORY = 10;
+int CURRENT_HISTORY = 0;
+bool IS_RUNNING = true;
 
 char **getArguments()
 {
@@ -16,6 +20,7 @@ char **getArguments()
 	while (isInput)
 	{
 		char x;
+		char *totalCommand = (char *)malloc(200);
 		int length = 0;
 		int CURRENT_SIZE = 20;
 		char *string = (char *)malloc(CURRENT_SIZE);
@@ -26,14 +31,21 @@ char **getArguments()
 			{
 				break;
 			}
-			if (x == '"')
+			else
 			{
-				flag = !flag;
+				char temp[2] = "\0";
+				temp[0] = x;
+				strcat(totalCommand, temp);
 			}
 			if (x == '\n')
 			{
 				isInput = false;
 			}
+			if (x == '"')
+			{
+				flag = !flag;
+			}
+
 			if ((x == ' ' && flag) || !isInput)
 			{
 				input[currentNumber] = string;
@@ -65,6 +77,23 @@ char **getArguments()
 	return input;
 }
 
+bool isInternal(char *command)
+{
+	return true;
+}
+
+void handleInternal(char **input)
+{
+	if (strcmp(input[0], "exit") == 0)
+	{
+		IS_RUNNING = false;
+	}
+}
+
+void handleExternal(char **input)
+{
+}
+
 void executeCommands(char **input)
 {
 	if (isInternal(input[0]))
@@ -75,6 +104,7 @@ void executeCommands(char **input)
 	{
 		handleExternal(input);
 	}
+	return;
 }
 
 int main(int argc, char *argv[])
@@ -88,9 +118,13 @@ int main(int argc, char *argv[])
 		5. Handle errors that can happen 
 		6. Check how you can implement only the specific external commands and not all external commands
 	*/
-	while (1)
+	HISTORY = (char **)calloc(MAX_HISTORY, sizeof(char *));
+	system("clear");
+	while (IS_RUNNING)
 	{
+		printf("current directory: ");
 		char **input = getArguments();
+		executeCommands(input);
 		for (int i = 0; i < NUMBER_OF_ARGUMENTS; i++)
 		{
 			printf("Pointer:%p Value:%s Length:%ld\n", *input[i], input[i], strlen(input[i]));
