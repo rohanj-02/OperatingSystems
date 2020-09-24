@@ -109,6 +109,15 @@ void handleInternal(char **input)
 	{
 		showHistory();
 	}
+	else if (strcmp(input[0], "cd") == 0)
+	{
+		if (chdir(input[1]) != 0)
+		{
+			printf("Cant change directory");
+		}
+		//cd works but pwd wont get updated. so manual change of pwd. save global variable pwd :/
+		printf("%s", getenv("PWD"));
+	}
 }
 
 void handleExternal(char **input)
