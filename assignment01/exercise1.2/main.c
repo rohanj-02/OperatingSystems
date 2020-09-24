@@ -11,16 +11,17 @@ char **HISTORY;
 int MAX_HISTORY = 10;
 int CURRENT_HISTORY = 0;
 bool IS_RUNNING = true;
+int MAX_LENGTH = 512;
 
 char **getArguments()
 {
 	bool isInput = true;
 	char **input = (char **)calloc(10, sizeof(char *));
+	char *totalCommand = (char *)malloc(200);
 	int currentNumber = 0;
 	while (isInput)
 	{
 		char x;
-		char *totalCommand = (char *)malloc(200);
 		int length = 0;
 		int CURRENT_SIZE = 20;
 		char *string = (char *)malloc(CURRENT_SIZE);
@@ -73,8 +74,24 @@ char **getArguments()
 			}
 		}
 	}
+	HISTORY[CURRENT_HISTORY] = totalCommand;
+	CURRENT_HISTORY++;
+	if (CURRENT_HISTORY >= MAX_HISTORY)
+	{
+		MAX_HISTORY *= 2;
+		char **temp = realloc(HISTORY, MAX_HISTORY * sizeof(char *));
+		HISTORY = temp;
+	}
 	NUMBER_OF_ARGUMENTS = currentNumber;
 	return input;
+}
+
+void showHistory()
+{
+	for (int i = 0; i < CURRENT_HISTORY; i++)
+	{
+		printf("Index:%d Command:%s\n", i + 1, HISTORY[i]);
+	}
 }
 
 bool isInternal(char *command)
@@ -87,6 +104,10 @@ void handleInternal(char **input)
 	if (strcmp(input[0], "exit") == 0)
 	{
 		IS_RUNNING = false;
+	}
+	else if (strcmp(input[0], "history") == 0)
+	{
+		showHistory();
 	}
 }
 
@@ -120,9 +141,27 @@ int main(int argc, char *argv[])
 	*/
 	HISTORY = (char **)calloc(MAX_HISTORY, sizeof(char *));
 	system("clear");
+	// char command[MAX_LENGTH];
 	while (IS_RUNNING)
 	{
 		printf("current directory: ");
+		// if (!fgets(command, MAX_LENGTH, stdin))
+		// {
+		// 	break;
+		// }
+		// if (command[strlen(command) - 1] == '\n')
+		// {
+		// 	command[strlen(command) - 1] = '\0';
+		// }
+		// HISTORY[CURRENT_HISTORY] = command;
+		// CURRENT_HISTORY++;
+		// if (CURRENT_HISTORY >= MAX_HISTORY)
+		// {
+		// 	char **temp = realloc(HISTORY, 2 * MAX_HISTORY * sizeof(char *));
+		// 	HISTORY = temp;
+		// 	MAX_HISTORY *= 2;
+		// }
+		// printf("%s", command);
 		char **input = getArguments();
 		executeCommands(input);
 		for (int i = 0; i < NUMBER_OF_ARGUMENTS; i++)
@@ -130,6 +169,7 @@ int main(int argc, char *argv[])
 			printf("Pointer:%p Value:%s Length:%ld\n", *input[i], input[i], strlen(input[i]));
 		}
 		free(input);
+		// free(HISTORY);
 	}
 
 	return 0;
