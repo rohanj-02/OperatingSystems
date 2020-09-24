@@ -111,12 +111,46 @@ void handleInternal(char **input)
 	}
 	else if (strcmp(input[0], "cd") == 0)
 	{
+		char pwd[256];
 		if (chdir(input[1]) != 0)
 		{
-			printf("Cant change directory");
+			perror("chdir() error");
 		}
-		//cd works but pwd wont get updated. so manual change of pwd. save global variable pwd :/
-		printf("%s", getenv("PWD"));
+		else
+		{
+			if (getcwd(pwd, sizeof(pwd)) == NULL)
+			{
+				perror("getcwd() error");
+			}
+			else
+			{
+				printf("pwd is : %s\n", pwd);
+			}
+		}
+	}
+	else if (strcmp(input[0], "pwd") == 0)
+	{
+		char pwd[256];
+		if (getcwd(pwd, sizeof(pwd)) == NULL)
+		{
+			perror("getcwd() error");
+		}
+		else
+		{
+			printf("pwd is : %s\n", pwd);
+		}
+	}
+	else if (strcmp(input[0], "echo") == 0)
+	{
+		for (int i = 1; i < NUMBER_OF_ARGUMENTS; i++)
+		{
+			printf("%s ", input[i]);
+		}
+		printf("\n");
+	}
+	else
+	{
+		printf("Bad Input!\n");
 	}
 }
 
@@ -173,13 +207,13 @@ int main(int argc, char *argv[])
 		// printf("%s", command);
 		char **input = getArguments();
 		executeCommands(input);
-		for (int i = 0; i < NUMBER_OF_ARGUMENTS; i++)
-		{
-			printf("Pointer:%p Value:%s Length:%ld\n", *input[i], input[i], strlen(input[i]));
-		}
+		// for (int i = 0; i < NUMBER_OF_ARGUMENTS; i++)
+		// {
+		// 	printf("Pointer:%p Value:%s Length:%ld\n", *input[i], input[i], strlen(input[i]));
+		// }
 		free(input);
-		// free(HISTORY);
 	}
+	free(HISTORY);
 
 	return 0;
 }
