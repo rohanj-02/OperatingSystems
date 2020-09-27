@@ -74,6 +74,10 @@ char **getArguments()
 			}
 		}
 	}
+
+	// TODO Add to history from file handling...
+	// ? Do I need to add up arrow key feature?
+
 	HISTORY[CURRENT_HISTORY] = totalCommand;
 	CURRENT_HISTORY++;
 	if (CURRENT_HISTORY >= MAX_HISTORY)
