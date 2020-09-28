@@ -94,11 +94,21 @@ char **getArguments()
 	return input;
 }
 
-void showHistory()
+void showHistory(int x)
 {
-	for (int i = 0; i < CURRENT_HISTORY; i++)
+	if (x == -1 || x >= CURRENT_HISTORY)
 	{
-		printf("Index:%d Command:%s\n", i + 1, HISTORY[i]);
+		for (int i = 0; i < CURRENT_HISTORY; i++)
+		{
+			printf("%d\t%s\n", i + 1, HISTORY[i]);
+		}
+	}
+	else
+	{
+		for (int i = CURRENT_HISTORY - 1; i >= CURRENT_HISTORY - x; i--)
+		{
+			printf("%d\t%s\n", i + 1, HISTORY[i]);
+		}
 	}
 }
 
@@ -124,7 +134,29 @@ void handleInternal(char **input)
 	}
 	else if (strcmp(input[0], "history") == 0)
 	{
-		showHistory();
+		if (input[1] != NULL)
+		{
+			if (strcmp(input[1], "-c") == 0)
+			{
+				MAX_HISTORY = 10;
+				CURRENT_HISTORY = 0;
+				HISTORY = (char **)calloc(MAX_HISTORY, sizeof(char *));
+				printf("History Cleared!\n");
+			}
+			else if (strcmp(input[1], "--help") == 0)
+			{
+				printf("History implements a numeric infront of it and -c to clear");
+				//TODO write documentation.
+			}
+			else
+			{
+				showHistory(atoi(input[1]));
+			}
+		}
+		else
+		{
+			showHistory(-1);
+		}
 	}
 	else if (strcmp(input[0], "cd") == 0)
 	{

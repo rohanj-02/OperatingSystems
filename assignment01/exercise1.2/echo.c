@@ -114,6 +114,7 @@ void echo(char **input, int number_of_args)
 {
 	if (strcmp(input[1], "--help") == 0)
 	{
+		//TODO complete docs
 		printf("Can use -n -e -E");
 		return;
 	}

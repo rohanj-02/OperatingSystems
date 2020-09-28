@@ -36,6 +36,8 @@ void cd(char *path)
 
 void runcd(char **input)
 {
+	//TODO Add --help flag
+
 	char pwd[256];
 	if (strcmp(input[1], "-L") == 0)
 	{
