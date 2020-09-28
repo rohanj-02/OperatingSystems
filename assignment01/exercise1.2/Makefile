@@ -1,3 +1,9 @@
-default:
+default: EXTERNAL
 	gcc -o main main.c
-	./main
+
+EXTERNAL:
+	echo "Running"
+	cd external && make
+
+clean:
+	cd external && make clean

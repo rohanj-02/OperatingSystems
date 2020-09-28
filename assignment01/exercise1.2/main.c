@@ -100,7 +100,15 @@ void showHistory()
 
 bool isInternal(char *command)
 {
-	return true;
+	char *internal[] = {"exit", "history", "cd", "pwd", "echo"};
+	for (int i = 0; i < 5; i++)
+	{
+		if (strcmp(command, internal[i]) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void handleInternal(char **input)
@@ -160,6 +168,29 @@ void handleInternal(char **input)
 
 void handleExternal(char **input)
 {
+	pid_t process = fork();
+	if (process == -1)
+	{
+		perror("Could not spawn child process ");
+	}
+	if (process == 0)
+	{
+		char path[512];
+		strcpy(path, getenv("PWD"));
+		strcat(path, "/external/");
+		strcat(path, input[0]);
+		if (execvp(path, input) == -1)
+		{
+			perror("Could not run external command");
+		}
+		exit(0);
+	}
+	else
+	{
+		waitpid(-1, NULL, 0);
+		return;
+	}
+	printf("External command");
 }
 
 void executeCommands(char **input)
