@@ -8,6 +8,7 @@
 #define HOME getenv("HOME")
 
 extern void runcd(char **);
+extern void echo(char **, int);
 
 int NUMBER_OF_ARGUMENTS = 10;
 char **HISTORY;
@@ -143,11 +144,7 @@ void handleInternal(char **input)
 	}
 	else if (strcmp(input[0], "echo") == 0)
 	{
-		for (int i = 1; i < NUMBER_OF_ARGUMENTS; i++)
-		{
-			printf("%s ", input[i]);
-		}
-		printf("\n");
+		echo(input, NUMBER_OF_ARGUMENTS);
 	}
 	else
 	{
@@ -222,13 +219,14 @@ void printDefaultPath()
 	char *temp = getSubstringPWD(pwd);
 	if (temp == NULL)
 	{
-		printf("%s$ ", pwd);
+		printf("%s", pwd);
 	}
 	else
 	{
-		printf("~%s$ ", temp);
+		printf("~%s", temp);
 	}
 	printf("\033[0m");
+	printf("$ ");
 }
 
 int main(int argc, char *argv[])
