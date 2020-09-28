@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #define HOME getenv("HOME")
 
+extern void runcd(char **);
+
 int NUMBER_OF_ARGUMENTS = 10;
 char **HISTORY;
 int MAX_HISTORY = 10;
@@ -112,31 +114,12 @@ bool isInternal(char *command)
 	return false;
 }
 
-void runcd(char **input)
-{
-	char pwd[256];
-	if (chdir(input[1]) != 0)
-	{
-		perror("chdir() error");
-	}
-	else
-	{
-		if (getcwd(pwd, sizeof(pwd)) == NULL)
-		{
-			perror("getcwd() error");
-		}
-		else
-		{
-			printf("pwd is : %s\n", pwd);
-		}
-	}
-}
-
 void handleInternal(char **input)
 {
 	if (strcmp(input[0], "exit") == 0)
 	{
 		IS_RUNNING = false;
+		printf("Shell exited! \n");
 	}
 	else if (strcmp(input[0], "history") == 0)
 	{
