@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#define HOME getenv("HOME")
 
 int NUMBER_OF_ARGUMENTS = 10;
 char **HISTORY;
@@ -111,6 +112,26 @@ bool isInternal(char *command)
 	return false;
 }
 
+void runcd(char **input)
+{
+	char pwd[256];
+	if (chdir(input[1]) != 0)
+	{
+		perror("chdir() error");
+	}
+	else
+	{
+		if (getcwd(pwd, sizeof(pwd)) == NULL)
+		{
+			perror("getcwd() error");
+		}
+		else
+		{
+			printf("pwd is : %s\n", pwd);
+		}
+	}
+}
+
 void handleInternal(char **input)
 {
 	if (strcmp(input[0], "exit") == 0)
@@ -123,22 +144,7 @@ void handleInternal(char **input)
 	}
 	else if (strcmp(input[0], "cd") == 0)
 	{
-		char pwd[256];
-		if (chdir(input[1]) != 0)
-		{
-			perror("chdir() error");
-		}
-		else
-		{
-			if (getcwd(pwd, sizeof(pwd)) == NULL)
-			{
-				perror("getcwd() error");
-			}
-			else
-			{
-				printf("pwd is : %s\n", pwd);
-			}
-		}
+		runcd(input);
 	}
 	else if (strcmp(input[0], "pwd") == 0)
 	{
@@ -206,6 +212,42 @@ void executeCommands(char **input)
 	return;
 }
 
+char *getSubstringPWD(char *pwd)
+{
+	int c = 0;
+	for (int i = 0; pwd[i] != '\0'; i++)
+	{
+		if (pwd[i] == '/')
+		{
+			c++;
+		}
+		if (c == 3)
+		{
+			return &pwd[i];
+		}
+	}
+	return NULL;
+}
+
+void printDefaultPath()
+{
+	printf("\033[1;32m");
+	printf("%s:", getenv("USER"));
+	printf("\033[1;34m");
+	char pwd[256];
+	getcwd(pwd, sizeof(pwd));
+	char *temp = getSubstringPWD(pwd);
+	if (temp == NULL)
+	{
+		printf("%s$ ", pwd);
+	}
+	else
+	{
+		printf("~%s$ ", temp);
+	}
+	printf("\033[0m");
+}
+
 int main(int argc, char *argv[])
 {
 	/* 
@@ -222,7 +264,10 @@ int main(int argc, char *argv[])
 	// char command[MAX_LENGTH];
 	while (IS_RUNNING)
 	{
-		printf("current directory: ");
+		// char pwd[256];
+		// getcwd(pwd, sizeof(pwd));
+		// printf("%s$ ", pwd);
+		printDefaultPath();
 		// if (!fgets(command, MAX_LENGTH, stdin))
 		// {
 		// 	break;
