@@ -1,0 +1,8 @@
+pwd:	pwd [-L|-P]
+	Print the name of current working directory.
+
+	Options:
+
+	-P	Print the physical directory, without any symbolic links
+
+	By default, behaves as if -P was specified.

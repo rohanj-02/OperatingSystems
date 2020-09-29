@@ -1,0 +1,23 @@
+echo:	echo [ [-n] -e|-E ] [STRING]...
+	Echo the STRING(s) to the standard output
+
+	Options:
+
+	-n	Do not output the trailing newline
+	-e	Enable interpretation of escape sequences
+	-E	Disable interpretation of escape sequences(default)
+	--help	Display this help and exit
+
+	If -e is in effect, the following sequences are recognised:
+	\\	backslash
+	\a	alert
+	\b	backspace
+	\c	produce no further output
+	\e	escape
+	\f	form feed
+	\n	newline
+	\r	carriage return
+	\t	horizontal tab
+	\v	vertical tab
+
+	NOTE: Can club options together by using -nE | -ne or -en | -En as flag.

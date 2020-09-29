@@ -1,5 +1,5 @@
 default: EXTERNAL
-	gcc -o main main.c internal.c echo.c
+	gcc -o main main.c cd.c echo.c
 
 EXTERNAL:
 	echo "Running"

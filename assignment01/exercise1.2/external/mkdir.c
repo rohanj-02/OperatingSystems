@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 // -m and -v
-
+//TODO ERROR HANDLING Check  number and input format before conversion...
 unsigned int getIntFromOctal(char *str)
 {
 	int i = 0, j = 0;

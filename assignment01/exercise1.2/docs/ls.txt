@@ -1,0 +1,12 @@
+ls: ls [ [-f] [-a] ] [DIR]
+	List information about DIR (current directory by default).
+
+	Sorts entries alphabetically unless -f is specified
+
+	Options:
+
+	-f	Does not sort
+	-a	Does not ignore entries starting with .
+	--help	Display this help and exit
+
+	NOTE: Can club options together by using -fa or -af as flag.

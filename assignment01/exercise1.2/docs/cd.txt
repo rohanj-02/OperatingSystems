@@ -1,0 +1,13 @@
+cd: cd [-P] [dir]
+    Change the shell working directory.
+    
+    Change the current directory to DIR.  The default DIR is the value of the
+    HOME shell variable.
+    
+    If DIR begins with a slash (/), then the DIR is treated as an absolute path.
+
+    Options:
+
+    -P  Use the physical directory structure without following symbolic links
+    --help  Display this help and exit
+    

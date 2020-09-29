@@ -1,0 +1,9 @@
+exit:	exit [n]
+	Exit the shell.
+	
+	Exits the shell with a status of n. If n is omitted, 
+	the exit status is 0.
+
+	Options:
+	--help	Displays this help and exit
+	 

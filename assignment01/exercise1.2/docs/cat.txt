@@ -1,0 +1,10 @@
+cat:	cat [ [-n] [-E] ] FILE...
+	Concatenate FILE(s) to standard output
+
+	Options:
+
+	-n	Displays line number
+	-E	Displays $ at end of each line
+	--help	Display this help and exit
+
+	NOTE: Can club options together by using -nE or -En as flag.

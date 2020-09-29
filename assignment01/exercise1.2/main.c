@@ -163,8 +163,16 @@ void handleInternal(char **input)
 {
 	if (strcmp(input[0], "exit") == 0)
 	{
-		IS_RUNNING = false;
-		printf("Shell exited! \n");
+		if (input[1] != NULL)
+		{
+			printf("Exiting with status code %d\n", atoi(input[1]));
+			exit(atoi(input[1]));
+		}
+		else
+		{
+			IS_RUNNING = false;
+			printf("Exiting with status code 0\n");
+		}
 	}
 	else if (strcmp(input[0], "history") == 0)
 	{

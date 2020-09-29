@@ -125,15 +125,21 @@ void echo(char **input, int number_of_args)
 		{
 			printEcho(&input[2], number_of_args - 2, false);
 		}
-		else if (strcmp(input[1], "-e") == 0)
+		else if ((strcmp(input[1], "-e") == 0) || (strcmp(input[1], "-en") == 0) || (strcmp(input[1], "-ne") == 0))
 		{
 			printEcho(&input[2], number_of_args - 2, true);
-			printf("\n");
+			if ((strcmp(input[1], "-e") == 0))
+			{
+				printf("\n");
+			}
 		}
-		else if (strcmp(input[1], "-E") == 0)
+		else if ((strcmp(input[1], "-E") == 0) || (strcmp(input[1], "-En") == 0) || (strcmp(input[1], "-nE") == 0))
 		{
 			printEcho(&input[2], number_of_args - 2, false);
-			printf("\n");
+			if (strcmp(input[1], "-E") == 0)
+			{
+				printf("\n");
+			}
 		}
 		else
 		{

@@ -66,7 +66,6 @@ static int compare(const void *first, const void *second)
 int main(int argc, char *argv[])
 {
 
-	// TODO ls is not working because of input mismatch.. Problem stated above getInput. fix from there.
 	char path[256];
 	getPath(argv, path);
 	DIR *currDir;

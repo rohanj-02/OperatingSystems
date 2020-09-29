@@ -1,0 +1,15 @@
+mkdir:	mkdir [ [-v] [-m n] ] DIR...
+	Create directory(ies) DIR, if they do not exist.
+
+	Options:
+
+	-v	Prints a message for each created directory
+	-m	Set file mode like chmod. Give space seperated
+		input in octal bits. 
+		
+		Example: mkdir -m 775 test
+		Creates a directory 'test' with permissions rwxrwxr-x
+	
+	--help	Display this help and then exit
+
+	NOTE: Can club options together by using [-mv n] or [-vm n] as flag.

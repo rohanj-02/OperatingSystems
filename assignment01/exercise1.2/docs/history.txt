@@ -1,0 +1,9 @@
+history:	history [-c|[-d offset]]
+	Display or manipulate the history list
+	
+	By default prints the entire history in a session.
+
+	Options:
+	-c	Clear the history list by deleting all entries
+	-d	Deletes the history entry at position offset. 
+	--help	Display this help and exit

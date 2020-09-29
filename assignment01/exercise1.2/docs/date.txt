@@ -1,0 +1,12 @@
+date:	date [ [-u] [-R] ]
+	Display the current time in a given format
+
+	Options:
+
+	-u	Display time at Coordinated Universal Time(UTC)
+	-R	Output date and time in RFC 5322 format.
+		Example: Mon, 14 Aug 2006 02:34:56 -0600
+
+	--help	Display this help and exit
+
+	NOTE: Can club options together by using -uR or -Ru as flag.

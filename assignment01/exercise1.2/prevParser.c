@@ -56,7 +56,7 @@
 // 	return inputArr;
 // }
 
-// TODO MAIN
+// MAIN
 // system("clear");
 // int initialSize = NUMBER_OF_ARGUMENTS * sizeof(char *);
 // char **x = (char **)malloc(initialSize);
