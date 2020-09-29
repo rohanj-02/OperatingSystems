@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define length 256
+extern void printDocs(char *);
 
 int main(int argc, char *argv[])
 {
@@ -16,8 +17,9 @@ int main(int argc, char *argv[])
 	bool isLineEnd = false;
 	if (strcmp(argv[1], "--help") == 0)
 	{
-		printf("Implements -n and -E flag !");
-		//TODO Add documentation
+		// printf("Implements -n and -E flag !");
+		// //TODO Add documentation
+		printDocs("cat.txt");
 		return 0;
 	}
 	if (strcmp(argv[1], "-E") == 0)

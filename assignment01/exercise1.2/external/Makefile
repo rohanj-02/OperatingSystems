@@ -5,6 +5,7 @@ PROGS = $(patsubst %.c,%,$(SRCS))
 all: $(PROGS)
 
 %: %.c
-	$(CC) $(CFLAGS) -o $@ $< -lm
+	$(CC) $(CFLAGS) -o $@ $< printDocs.c -lm
+
 clean: 
 	rm -f $(PROGS)
