@@ -8,35 +8,9 @@
 // IMplement sort for normal ls
 // ls -a : print all including those starting with .
 
-// int main(int argc, char *argv[])
-// {
-
-// 	char pwd[256];
-// 	getcwd(pwd, sizeof(pwd));
-// 	DIR *currDir;
-// 	currDir = opendir(pwd);
-// 	struct dirent *iterDir;
-
-// 	if (currDir != NULL)
-// 	{
-// 		iterDir = readdir(currDir);
-// 		while (iterDir != NULL)
-// 		{
-// 			printf("%s\n", iterDir->d_name);
-// 			iterDir = readdir(currDir);
-// 		}
-// 		closedir(currDir);
-// 	}
-// 	else
-// 	{
-// 		perror("Could not open directory! ");
-// 	}
-// }
-
 char *getPath(char *argv[], char *path)
 {
 	int index = 1;
-	// ?GET path returns empty string when doing only ls.. Therefore it does not work
 	if (strcmp(argv[1], "-t") == 0 || strcmp(argv[1], "-a") == 0 || strcmp(argv[1], "-ta") == 0 || strcmp(argv[1], "-at") == 0)
 	{
 		index = 2;
@@ -74,11 +48,9 @@ int getList(DIR *currDir, char **fileNames)
 		iterDir = readdir(currDir);
 		while (iterDir != NULL)
 		{
-			// printf("%s\n", iterDir->d_name);
 			fileNames[counter] = malloc(256);
 			strcpy(fileNames[counter], iterDir->d_name);
 			counter++;
-			// printf("%s\n", fileNames[counter - 1]);
 			iterDir = readdir(currDir);
 		}
 		closedir(currDir);
@@ -98,7 +70,7 @@ static int compare(const void *first, const void *second)
 int main(int argc, char *argv[])
 {
 
-	//TODO Figure why ls is not working..
+	// TODO ls is not working because of input mismatch.. Problem stated above getInput. fix from there.
 	char path[256];
 	getPath(argv, path);
 	DIR *currDir;
@@ -136,10 +108,10 @@ int main(int argc, char *argv[])
 		qsort(fileNames, numDir, sizeof(const char *), compare);
 		for (int i = 0; i < numDir; i++)
 		{
-			// if (fileNames[i][0] != '.')
-			// {
-			printf("%s\n", fileNames[i]);
-			// }
+			if (fileNames[i][0] != '.')
+			{
+				printf("%s\n", fileNames[i]);
+			}
 		}
 	}
 }

@@ -6,7 +6,8 @@
 #include <string.h>
 #include <stdbool.h>
 #define HOME getenv("HOME")
-
+//TODO Add error handling, if a command has only one word and no spaces at the end then segfault.
+//TODO if command has one word and space at end it works...
 extern void runcd(char **);
 extern void echo(char **, int);
 
@@ -79,9 +80,6 @@ char **getArguments()
 		}
 	}
 
-	// TODO Add to history from file handling...
-	// ? Do I need to add up arrow key feature?
-
 	HISTORY[CURRENT_HISTORY] = totalCommand;
 	CURRENT_HISTORY++;
 	if (CURRENT_HISTORY >= MAX_HISTORY)
@@ -100,14 +98,14 @@ void showHistory(int x)
 	{
 		for (int i = 0; i < CURRENT_HISTORY; i++)
 		{
-			printf("%d\t%s\n", i + 1, HISTORY[i]);
+			printf("%d\t%s", i + 1, HISTORY[i]);
 		}
 	}
 	else
 	{
 		for (int i = CURRENT_HISTORY - 1; i >= CURRENT_HISTORY - x; i--)
 		{
-			printf("%d\t%s\n", i + 1, HISTORY[i]);
+			printf("%d\t%s", i + 1, HISTORY[i]);
 		}
 	}
 }
