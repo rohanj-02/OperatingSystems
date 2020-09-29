@@ -1,16 +1,60 @@
 #include <stdio.h>
 #include <sys/stat.h>
-#include <errno.h>
 #include <string.h>
+#include <stdbool.h>
+#include <math.h>
+#include <stdlib.h>
+
+// -m and -v
+
+unsigned int getIntFromOctal(char *str)
+{
+	int i = 0, j = 0;
+	unsigned int returnVal = 0;
+	for (i = 0; str[i] != '\0'; i++)
+		;
+	int length = i;
+	for (i = length - 1; i >= 0; i--)
+	{
+		returnVal += (int)((str[i] - 48) * (int)pow(8, j));
+		j++;
+	}
+	return returnVal;
+}
+
 int main(int argc, char *argv[])
 {
-	for (int i = 1; i < argc; i++)
+	bool isAlert = false;
+	int startIndex = 1;
+	mode_t mode = 0775;
+	if (strcmp(argv[1], "--help") == 0)
 	{
-		if ((mkdir(argv[i], 00777)) == -1)
+		printf("Implements -m and -v.");
+		//TODO Add documentation
+	}
+	if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "-mv") == 0) || (strcmp(argv[1], "-vm") == 0))
+	{
+		isAlert = true;
+		startIndex = 2;
+	}
+	if ((strcmp(argv[1], "-m") == 0) || (strcmp(argv[1], "-mv") == 0) || (strcmp(argv[1], "-vm") == 0))
+	{
+		startIndex = 3;
+		mode = getIntFromOctal(argv[2]);
+	}
+
+	for (int i = startIndex; i < argc; i++)
+	{
+		if ((mkdir(argv[i], mode)) == -1)
 		{
-			// perror(strerror(errno));
-			perror("Error");
-			// printf("The directory %s already exists!\n", argv[i]);
+			perror("mkdir");
+		}
+		else
+		{
+			if (isAlert)
+			{
+				printf("Create directory: %s\n", argv[i]);
+			}
 		}
 	}
 }
