@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -59,36 +61,113 @@ char getSection(char *entry)
 
 void parseCsv(char section)
 {
-	FILE *fptr;
-	fptr = fopen("./data.csv", "r");
-	if (fptr == NULL)
+	// FILE *fptr;
+	int fptr = open("./data.csv", O_RDONLY);
+
+	// fptr = fopen("./data.csv", "r");
+	if (fptr == -1)
 	{
 		printf("Make sure the file is in the same directory as the program! ");
 		exit(1);
 	}
-	char headers[200];
-	fscanf(fptr, "%s", headers);
-	char row[21];
-	int count = 0;
-	bool end = false;
-	while (!end)
+	char headers = '1';
+	while (headers != '\n')
 	{
-		if (feof(fptr))
+		read(fptr, &headers, 1);
+	}
+
+	bool isEOF = false;
+	while (1)
+	{
+		if (isEOF)
 		{
-			end = feof(fptr);
 			break;
 		}
-		fscanf(fptr, "%s", row);
+		char row[21];
+		int count = 0;
+		char x;
+		bool isInput = true;
+		while (1)
+		{
+			if (read(fptr, &x, 1) == 0)
+			{
+				isEOF = true;
+			}
+			// printf("%c", x);
+			if (!isInput || isEOF)
+			{
+				break;
+			}
+			if (x == '\n')
+			{
+				isInput = false;
+			}
+			if (count == 0)
+			{
+				char temp[2] = "\0";
+				temp[0] = x;
+				strcpy(row, temp);
+				count++;
+			}
+			else
+			{
+
+				char temp[2] = "\0";
+				temp[0] = x;
+				strcat(row, temp);
+			}
+		}
 		char *entries = strtok(row, ",");
+		// while (entries != NULL)
+		// {
+		// 	printf("%s, ", entries);
+		// 	entries = strtok(NULL, ",");
+		// }
 		if (getSection(entries) == section)
 		{
 			struct student s = getStudentDetails(entries, section);
 			printStudent(s);
 		}
-		count++;
-		end = feof(fptr);
 	}
-	fclose(fptr);
+	// char temp[2] = "\0";
+	// strcat(row, temp);
+	// while (row[count] != '\n')
+	// {
+	// 	char ch;
+	// 	if (count != 0)
+	// 	{
+	// 		count++;
+	// 	}
+	// 	if (read(fptr, &ch, 1) != -1)
+	// 	{
+	// 		printf("%c", ch);
+	// 		row[count] = ch;
+	// 	}
+	// 	if (count == 0)
+	// 	{
+	// 		count++;
+	// 	}
+	// }
+	// row[++count] = '\0';
+	// fscanf(fptr, "%s", headers);
+	// bool end = false;
+	// printf("%s", row);
+
+	close(fptr);
+	// while (!end)
+	// {
+	// 	if (feof(fptr))
+	// 	{
+	// 		end = feof(fptr);
+	// 		break;
+	// 	}
+	// 	fscanf(fptr, "%s", row);
+	// 	char *entries = strtok(row, ",");
+
+	// 	count++;
+	// 	end = feof(fptr);
+	// }
+	// fclose(fptr);
 }
 
 int main(int argc, char *argv[])
