@@ -4,7 +4,6 @@
 #include <string.h>
 #include <unistd.h>
 
-// TODO Change code s.t. it cannot remove directory.. It needs a flag to do it.
 // -i -d -r to see
 
 int main(int argc, char *argv[])

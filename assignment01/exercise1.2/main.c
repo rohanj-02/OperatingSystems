@@ -5,9 +5,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#define HOME getenv("HOME")
-//TODO Add error handling, if a command has only one word and no spaces at the end then segfault.
-//TODO if command has one word and space at end it works...
+
+// TODO Add error handling, if a command has only one word and no spaces at the end then segfault.
+// TODO if command has one word and space at end it works...
+// TODO
+/* 
+1. cd, pwd
+////2. history one more flag
+////3. ls check -t (maybe implement -h or -r for reverse)
+////	ls -t definitely wrong. In ls, convert to lowercase to compare.
+4. Error handling when no space at end
+5. Documentation and help flags.
+*/
+
 extern void runcd(char **);
 extern void echo(char **, int);
 
@@ -123,6 +133,32 @@ bool isInternal(char *command)
 	return false;
 }
 
+bool isNum(char *str)
+{
+	for (int i = 0; str[i] != '\0'; i++)
+	{
+		if (!(str[i] >= '0' && str[i] <= '9'))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void deleteHistory(int offset)
+{
+	if (offset > CURRENT_HISTORY || offset <= 0)
+	{
+		printf("%d: Offset position out of range!\n", offset);
+		return;
+	}
+	for (int i = offset - 1; i < CURRENT_HISTORY - 1; i++)
+	{
+		HISTORY[i] = HISTORY[i + 1];
+	}
+	CURRENT_HISTORY--;
+}
+
 void handleInternal(char **input)
 {
 	if (strcmp(input[0], "exit") == 0)
@@ -141,14 +177,35 @@ void handleInternal(char **input)
 				HISTORY = (char **)calloc(MAX_HISTORY, sizeof(char *));
 				printf("History Cleared!\n");
 			}
+			else if (strcmp(input[1], "-d") == 0)
+			{
+				if (input[2] == NULL)
+				{
+					printf("-d requires a numerical offset to delete history. Try '--help' for more information.\n");
+					return;
+				}
+				else if (!isNum(input[2]))
+				{
+					printf("%s: Offset position out of range!\n", input[2]);
+					return;
+				}
+				deleteHistory(atoi(input[2]));
+			}
 			else if (strcmp(input[1], "--help") == 0)
 			{
-				printf("History implements a numeric infront of it and -c to clear");
+				printf("History implements a numeric infront of it and -c to clear\n");
 				//TODO write documentation.
 			}
 			else
 			{
-				showHistory(atoi(input[1]));
+				if (isNum(input[1]))
+				{
+					showHistory(atoi(input[1]));
+				}
+				else
+				{
+					printf("%s: Position out of range!\n", input[1]);
+				}
 			}
 		}
 		else

@@ -23,9 +23,6 @@ void printEscape(char c)
 	case 'n':
 		printf("\n");
 		break;
-	case 'r':
-		printf("\r");
-		break;
 	case 't':
 		printf("\t");
 		break;
@@ -54,6 +51,10 @@ char *preprocess(char *message, char **input, int number_of_args, bool isEscape)
 					message[messageCounter] = '\0';
 					j++;
 					return message;
+				}
+				else if (input[i][j] == 'r')
+				{
+					messageCounter = 0;
 				}
 				else
 				{

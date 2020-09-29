@@ -3,15 +3,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
-// stat to see permissions
-// Default is -t: implemented but remove files starting with a .
-// IMplement sort for normal ls
-// ls -a : print all including those starting with .
 
 char *getPath(char *argv[], char *path)
 {
 	int index = 1;
-	if (strcmp(argv[1], "-t") == 0 || strcmp(argv[1], "-a") == 0 || strcmp(argv[1], "-ta") == 0 || strcmp(argv[1], "-at") == 0)
+	if (strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "-a") == 0 || strcmp(argv[1], "-fa") == 0 || strcmp(argv[1], "-af") == 0)
 	{
 		index = 2;
 	}
@@ -64,7 +60,7 @@ int getList(DIR *currDir, char **fileNames)
 
 static int compare(const void *first, const void *second)
 {
-	return strcmp(*(const char **)first, *(const char **)second);
+	return strcasecmp(*(const char **)first, *(const char **)second);
 }
 
 int main(int argc, char *argv[])
@@ -78,14 +74,11 @@ int main(int argc, char *argv[])
 	char *fileNames[256];
 	int numDir = getList(currDir, fileNames);
 
-	if (strcmp(argv[1], "-t") == 0)
+	if (strcmp(argv[1], "-f") == 0)
 	{
 		for (int i = 0; i < numDir; i++)
 		{
-			if (fileNames[i][0] != '.')
-			{
-				printf("%s\n", fileNames[i]);
-			}
+			printf("%s\n", fileNames[i]);
 		}
 	}
 	else if (strcmp(argv[1], "-a") == 0)
@@ -96,7 +89,7 @@ int main(int argc, char *argv[])
 			printf("%s\n", fileNames[i]);
 		}
 	}
-	else if ((strcmp(argv[1], "-ta") == 0) || (strcmp(argv[1], "-at") == 0))
+	else if ((strcmp(argv[1], "-fa") == 0) || (strcmp(argv[1], "-af") == 0))
 	{
 		for (int i = 0; i < numDir; i++)
 		{
