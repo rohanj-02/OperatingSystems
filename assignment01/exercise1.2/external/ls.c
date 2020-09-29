@@ -7,7 +7,7 @@
 char *getPath(char *argv[], char *path)
 {
 	int index = 1;
-	if (strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "-a") == 0 || strcmp(argv[1], "-fa") == 0 || strcmp(argv[1], "-af") == 0)
+	if (argv[1] != NULL && (strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "-a") == 0 || strcmp(argv[1], "-fa") == 0 || strcmp(argv[1], "-af") == 0))
 	{
 		index = 2;
 	}
@@ -74,7 +74,18 @@ int main(int argc, char *argv[])
 	char *fileNames[256];
 	int numDir = getList(currDir, fileNames);
 
-	if (strcmp(argv[1], "-f") == 0)
+	if (argv[1] == NULL)
+	{
+		qsort(fileNames, numDir, sizeof(const char *), compare);
+		for (int i = 0; i < numDir; i++)
+		{
+			if (fileNames[i][0] != '.')
+			{
+				printf("%s\n", fileNames[i]);
+			}
+		}
+	}
+	else if (strcmp(argv[1], "-f") == 0)
 	{
 		for (int i = 0; i < numDir; i++)
 		{

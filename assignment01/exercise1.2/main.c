@@ -14,7 +14,7 @@
 ////2. history one more flag
 ////3. ls check -t (maybe implement -h or -r for reverse)
 ////	ls -t definitely wrong. In ls, convert to lowercase to compare.
-4. Error handling when no space at end
+////4. Error handling when no space at end
 5. Documentation and help flags.
 */
 

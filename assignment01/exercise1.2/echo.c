@@ -113,29 +113,36 @@ void printEcho(char **input, int number_of_args, bool isEscape)
 
 void echo(char **input, int number_of_args)
 {
-	if (strcmp(input[1], "--help") == 0)
+	if (number_of_args > 1)
 	{
-		//TODO complete docs
-		printf("Can use -n -e -E");
-		return;
-	}
-	if (strcmp(input[1], "-n") == 0)
-	{
-		printEcho(&input[2], number_of_args - 2, false);
-	}
-	else if (strcmp(input[1], "-e") == 0)
-	{
-		printEcho(&input[2], number_of_args - 2, true);
-		printf("\n");
-	}
-	else if (strcmp(input[1], "-E") == 0)
-	{
-		printEcho(&input[2], number_of_args - 2, false);
-		printf("\n");
+		if (strcmp(input[1], "--help") == 0)
+		{
+			//TODO complete docs
+			printf("Can use -n -e -E");
+			return;
+		}
+		if (strcmp(input[1], "-n") == 0)
+		{
+			printEcho(&input[2], number_of_args - 2, false);
+		}
+		else if (strcmp(input[1], "-e") == 0)
+		{
+			printEcho(&input[2], number_of_args - 2, true);
+			printf("\n");
+		}
+		else if (strcmp(input[1], "-E") == 0)
+		{
+			printEcho(&input[2], number_of_args - 2, false);
+			printf("\n");
+		}
+		else
+		{
+			printEcho(&input[1], number_of_args - 1, false);
+			printf("\n");
+		}
 	}
 	else
 	{
-		printEcho(&input[1], number_of_args - 1, false);
 		printf("\n");
 	}
 	return;
