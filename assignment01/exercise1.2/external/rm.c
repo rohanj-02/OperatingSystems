@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
 				char x;
 				scanf("%c", &x);
 				flag = x == 'y';
+				scanf("%c", &x);
 			}
 			else
 			{

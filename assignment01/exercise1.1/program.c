@@ -61,10 +61,7 @@ char getSection(char *entry)
 
 void parseCsv(char section)
 {
-	// FILE *fptr;
 	int fptr = open("./data.csv", O_RDONLY);
-
-	// fptr = fopen("./data.csv", "r");
 	if (fptr == -1)
 	{
 		printf("Make sure the file is in the same directory as the program! ");
@@ -89,13 +86,13 @@ void parseCsv(char section)
 		bool isInput = true;
 		while (1)
 		{
+			if (!isInput || isEOF)
+			{
+				break;
+			}
 			if (read(fptr, &x, 1) == 0)
 			{
 				isEOF = true;
-			}
-			// printf("%c", x);
-			if (!isInput || isEOF)
-			{
 				break;
 			}
 			if (x == '\n')
@@ -118,56 +115,13 @@ void parseCsv(char section)
 			}
 		}
 		char *entries = strtok(row, ",");
-		// while (entries != NULL)
-		// {
-		// 	printf("%s, ", entries);
-		// 	entries = strtok(NULL, ",");
-		// }
 		if (getSection(entries) == section)
 		{
 			struct student s = getStudentDetails(entries, section);
 			printStudent(s);
 		}
 	}
-	// char temp[2] = "\0";
-	// strcat(row, temp);
-	// while (row[count] != '\n')
-	// {
-	// 	char ch;
-	// 	if (count != 0)
-	// 	{
-	// 		count++;
-	// 	}
-	// 	if (read(fptr, &ch, 1) != -1)
-	// 	{
-	// 		printf("%c", ch);
-	// 		row[count] = ch;
-	// 	}
-	// 	if (count == 0)
-	// 	{
-	// 		count++;
-	// 	}
-	// }
-	// row[++count] = '\0';
-	// fscanf(fptr, "%s", headers);
-	// bool end = false;
-	// printf("%s", row);
-
 	close(fptr);
-	// while (!end)
-	// {
-	// 	if (feof(fptr))
-	// 	{
-	// 		end = feof(fptr);
-	// 		break;
-	// 	}
-	// 	fscanf(fptr, "%s", row);
-	// 	char *entries = strtok(row, ",");
-
-	// 	count++;
-	// 	end = feof(fptr);
-	// }
-	// fclose(fptr);
 }
 
 int main(int argc, char *argv[])
