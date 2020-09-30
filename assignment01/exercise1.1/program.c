@@ -38,14 +38,43 @@ struct student getStudentDetails(char *entry, char section)
 	return s;
 }
 
+void writeToStdout(char *str, int length)
+{
+	if (write(STDOUT_FILENO, str, length) == -1)
+	{
+		perror("write: error");
+		exit(1);
+	}
+	return;
+}
+
 void printStudent(struct student s)
 {
-	printf("ID: %d, Section: %c, Average: %f\n", s.id, s.section, s.average);
+	char id[] = "ID: ";
+	char section[] = "\t\tSection: ";
+	char average[] = "\tAverage: ";
+	char student_id[4];
+	int id_length;
+	if ((int)(s.id / 1000) == 0)
+		id_length = 3;
+	if ((int)(s.id / 100) == 0)
+		id_length = 2;
+	if ((int)(s.id / 10) == 0)
+		id_length = 1;
+	char student_average[8];
+	sprintf(student_id, "%d", s.id);
+	sprintf(student_average, "%.3f\n", s.average);
+	writeToStdout(id, sizeof(id));
+	writeToStdout(student_id, id_length);
+	writeToStdout(section, sizeof(section));
+	writeToStdout(&s.section, sizeof(s.section));
+	writeToStdout(average, sizeof(average));
+	writeToStdout(student_average, sizeof(student_average));
+	// printf("ID: %d, Section: %c, Average: %f\n", s.id, s.section, s.average);
 }
 
 char getSection(char *entry)
 {
-	// int count = 0;
 	int count = 0;
 	while (entry != NULL)
 	{
@@ -64,9 +93,10 @@ void parseCsv(char section)
 	int fptr = open("./data.csv", O_RDONLY);
 	if (fptr == -1)
 	{
-		printf("Make sure the file is in the same directory as the program! ");
+		perror("open: Error in opening data.csv");
 		exit(1);
 	}
+	//Discard headers from csv file
 	char headers = '1';
 	while (headers != '\n')
 	{
@@ -74,6 +104,7 @@ void parseCsv(char section)
 	}
 
 	bool isEOF = false;
+	//External loop looping over each record
 	while (1)
 	{
 		if (isEOF)
@@ -84,21 +115,29 @@ void parseCsv(char section)
 		int count = 0;
 		char x;
 		bool isInput = true;
+		//Loop to get one row
 		while (1)
 		{
 			if (!isInput || isEOF)
 			{
 				break;
 			}
-			if (read(fptr, &x, 1) == 0)
+			int status = read(fptr, &x, 1);
+			if (status == 0)
 			{
 				isEOF = true;
 				break;
+			}
+			if (status == -1)
+			{
+				perror("read: error");
+				exit(1);
 			}
 			if (x == '\n')
 			{
 				isInput = false;
 			}
+			//If first byte then strcpy else strcat
 			if (count == 0)
 			{
 				char temp[2] = "\0";
@@ -114,6 +153,7 @@ void parseCsv(char section)
 				strcat(row, temp);
 			}
 		}
+		// If section matches then construct student struct and print student details
 		char *entries = strtok(row, ",");
 		if (getSection(entries) == section)
 		{
@@ -121,13 +161,16 @@ void parseCsv(char section)
 			printStudent(s);
 		}
 	}
-	close(fptr);
+	if (close(fptr) == -1)
+	{
+		perror("close: error");
+		exit(1);
+	}
 }
 
 int main(int argc, char *argv[])
 {
 	pid_t process;
-	int status;
 	process = fork();
 	if (process == -1)
 	{
@@ -143,7 +186,11 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		waitpid(-1, NULL, 0);
+		if (waitpid(-1, NULL, 0) == -1)
+		{
+			perror("wait: error");
+			exit(1);
+		}
 		printf("Parent Process running! PID is: %ld\n", (long)getpid());
 		parseCsv('B');
 		printf("Terminating Parent Process! \n");
