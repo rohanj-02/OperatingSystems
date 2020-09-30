@@ -5,6 +5,8 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 
+extern void printDocs(char *);
+
 void cd(char *path)
 {
 	if (path[0] != '/')
@@ -64,8 +66,7 @@ void runcd(char **input)
 		}
 		else if (strcmp(input[1], "--help") == 0)
 		{
-			printf("cd command implements -P flag and default flag.\n-P\tuse the physical directory structure without following symbolic \n\tlinks: resolve symbolic links in DIR before processing instances of `..' \n");
-			//TODO Better docs
+			printDocs("cd.txt");
 		}
 		else
 		{

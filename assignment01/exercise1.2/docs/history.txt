@@ -1,6 +1,7 @@
-history:	history [-c|[-d offset]]
-	Display or manipulate the history list
+history:	history [-c|[-d offset]] number
+	Display or manipulate the history list.
 	
+	If number specified, then prints last number of commands in history.
 	By default prints the entire history in a session.
 
 	Options:

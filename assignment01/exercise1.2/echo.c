@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+extern void printDocs(char *);
+
 void printEscape(char c)
 {
 	switch (c)
@@ -117,8 +119,7 @@ void echo(char **input, int number_of_args)
 	{
 		if (strcmp(input[1], "--help") == 0)
 		{
-			//TODO complete docs
-			printf("Can use -n -e -E");
+			printDocs("echo.txt");
 			return;
 		}
 		if (strcmp(input[1], "-n") == 0)

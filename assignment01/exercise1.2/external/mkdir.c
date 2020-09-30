@@ -5,6 +5,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+extern void printDocs(char *);
+
 // -m and -v
 //TODO ERROR HANDLING Check  number and input format before conversion...
 unsigned int getIntFromOctal(char *str)
@@ -29,8 +31,8 @@ int main(int argc, char *argv[])
 	mode_t mode = 0775;
 	if (strcmp(argv[1], "--help") == 0)
 	{
-		printf("Implements -m and -v.");
-		//TODO Add documentation
+		printDocs("mkdir.txt");
+		return 0;
 	}
 	if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "-mv") == 0) || (strcmp(argv[1], "-vm") == 0))
 	{

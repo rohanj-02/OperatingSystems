@@ -1,11 +1,9 @@
-SRCS = $(wildcard *.c)
+default: 
+	@gcc -o cat cat.c printDocs.c
+	@gcc -o date date.c printDocs.c
+	@gcc -o ls ls.c printDocs.c
+	@gcc -o mkdir mkdir.c printDocs.c -lm
+	@gcc -o rm rm.c printDocs.c
 
-PROGS = $(patsubst %.c,%,$(SRCS))
-
-all: $(PROGS)
-
-%: %.c
-	$(CC) $(CFLAGS) -o $@ $< printDocs.c -lm
-
-clean: 
-	rm -f $(PROGS)
+clean:
+	@rm cat date ls mkdir rm

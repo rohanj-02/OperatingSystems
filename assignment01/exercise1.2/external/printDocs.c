@@ -5,16 +5,20 @@
 #include <stdbool.h>
 #include <string.h>
 
+extern void printDocs(char *);
+
 void printDocs(char *str)
 {
 	int fileDescriptor;
 	char *pwd;
 	pwd = getenv("PWD");
-	strcat(pwd, "/docs/");
-	strcat(pwd, str);
-	if ((fileDescriptor = open(pwd, O_RDONLY)) < 0)
+	char copy[256];
+	strcpy(copy, pwd);
+	strcat(copy, "/docs/");
+	strcat(copy, str);
+	if ((fileDescriptor = open(copy, O_RDONLY)) < 0)
 	{
-		printf("Could not find file %s", pwd);
+		printf("Could not find file %s", copy);
 	}
 	else
 	{

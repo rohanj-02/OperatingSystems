@@ -20,6 +20,7 @@
 
 extern void runcd(char **);
 extern void echo(char **, int);
+extern void printDocs(char *);
 
 int NUMBER_OF_ARGUMENTS = 10;
 char **HISTORY;
@@ -122,8 +123,8 @@ void showHistory(int x)
 
 bool isInternal(char *command)
 {
-	char *internal[] = {"exit", "history", "cd", "pwd", "echo"};
-	for (int i = 0; i < 5; i++)
+	char *internal[] = {"exit", "history", "cd", "pwd", "echo", "help"};
+	for (int i = 0; i < 6; i++)
 	{
 		if (strcmp(command, internal[i]) == 0)
 		{
@@ -165,8 +166,15 @@ void handleInternal(char **input)
 	{
 		if (input[1] != NULL)
 		{
-			printf("Exiting with status code %d\n", atoi(input[1]));
-			exit(atoi(input[1]));
+			if (strcmp(input[1], "--help") == 0)
+			{
+				printDocs("exit.txt");
+			}
+			else
+			{
+				printf("Exiting with status code %d\n", atoi(input[1]));
+				exit(atoi(input[1]));
+			}
 		}
 		else
 		{
@@ -201,8 +209,7 @@ void handleInternal(char **input)
 			}
 			else if (strcmp(input[1], "--help") == 0)
 			{
-				printf("History implements a numeric infront of it and -c to clear\n");
-				//TODO write documentation.
+				printDocs("history.txt");
 			}
 			else
 			{
@@ -227,19 +234,44 @@ void handleInternal(char **input)
 	}
 	else if (strcmp(input[0], "pwd") == 0)
 	{
-		char pwd[256];
-		if (getcwd(pwd, sizeof(pwd)) == NULL)
+		bool isP = true;
+		if (input[1] != NULL)
 		{
-			perror("getcwd() error");
+			if (strcmp(input[1], "--help") == 0)
+			{
+				isP = false;
+				printDocs("pwd.txt");
+			}
+			else if (strcmp(input[1], "-L") == 0)
+			{
+				isP = false;
+				printf("Not implemented yet");
+			}
+			else
+			{
+				isP = true;
+			}
 		}
-		else
+		if (isP)
 		{
-			printf("pwd is : %s\n", pwd);
+			char pwd[256];
+			if (getcwd(pwd, sizeof(pwd)) == NULL)
+			{
+				perror("getcwd() error");
+			}
+			else
+			{
+				printf("pwd is : %s\n", pwd);
+			}
 		}
 	}
 	else if (strcmp(input[0], "echo") == 0)
 	{
 		echo(input, NUMBER_OF_ARGUMENTS);
+	}
+	else if (strcmp(input[0], "help") == 0)
+	{
+		printDocs("help.txt");
 	}
 	else
 	{
@@ -253,6 +285,7 @@ void handleExternal(char **input)
 	if (process == -1)
 	{
 		perror("Could not spawn child process ");
+		return;
 	}
 	if (process == 0)
 	{
@@ -262,7 +295,9 @@ void handleExternal(char **input)
 		strcat(path, input[0]);
 		if (execvp(path, input) == -1)
 		{
-			perror("Could not run external command");
+			char errorMsg[256];
+			sprintf(errorMsg, "Could not run command: %s\nTry help for more information", input[0]);
+			perror(errorMsg);
 		}
 		exit(0);
 	}
@@ -271,7 +306,6 @@ void handleExternal(char **input)
 		waitpid(-1, NULL, 0);
 		return;
 	}
-	printf("External command");
 }
 
 void executeCommands(char **input)

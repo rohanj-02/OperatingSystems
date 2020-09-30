@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 // -i -d -r to see
+extern void printDocs(char *);
 
 int main(int argc, char *argv[])
 {
@@ -12,8 +13,8 @@ int main(int argc, char *argv[])
 
 	if (strcmp(argv[1], "--help") == 0)
 	{
-		printf("Can implement -i and -d");
-		//TODO Write documentation
+		printDocs("rm.txt");
+		return 0;
 	}
 	if ((strcmp(argv[1], "-i") == 0) || (strcmp(argv[1], "-id") == 0) || (strcmp(argv[1], "-di") == 0))
 	{

@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+extern void printDocs(char *);
+
 char *getPath(char *argv[], char *path)
 {
 	int index = 1;
@@ -66,6 +68,11 @@ static int compare(const void *first, const void *second)
 int main(int argc, char *argv[])
 {
 
+	if (argv[1] != NULL && (strcmp(argv[1], "--help") == 0))
+	{
+		printDocs("ls.txt");
+		return 0;
+	}
 	char path[256];
 	getPath(argv, path);
 	DIR *currDir;
@@ -84,6 +91,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+
 	else if (strcmp(argv[1], "-f") == 0)
 	{
 		for (int i = 0; i < numDir; i++)

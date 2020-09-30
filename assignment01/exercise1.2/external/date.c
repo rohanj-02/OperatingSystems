@@ -4,12 +4,13 @@
 #include <unistd.h>
 #include <string.h>
 
+extern void printDocs(char *);
+
 int main(int argc, char *argv[])
 {
 	if (strcmp(argv[1], "--help") == 0)
 	{
-		printf("-u for utc time and -R for rfc 5322 format for eg.: Mon, 14 Aug 2006 02:34:56 -0600");
-		//TODO Add documentation
+		printDocs("date.txt");
 		return 0;
 	}
 	time_t currTime = time(NULL);
