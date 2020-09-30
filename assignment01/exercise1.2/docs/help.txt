@@ -1,0 +1,137 @@
+cat:	cat [ [-n] [-E] ] FILE...
+	Concatenate FILE(s) to standard output
+
+	Options:
+
+	-n	Displays line number
+	-E	Displays $ at end of each line
+	--help	Display this help and exit
+
+	NOTE: Can club options together by using -nE or -En as flag.
+
+cd: cd [-P [-e]] [dir]
+    Change the shell working directory.
+    
+    Change the current directory to DIR.  The default DIR is the value of the
+    HOME shell variable.
+    
+    If DIR begins with a slash (/), then the DIR is treated as an absolute path.
+
+    Options:
+
+    -P  Use the physical directory structure without following symbolic links
+    -P -e   Exit with a non-zero status is cannot resolve current working directory
+    ~   cd to HOME directory
+    --help  Display this help and exit
+    
+date:	date [ [-u] [-R] ]
+	Display the current time in a given format
+
+	Options:
+
+	-u	Display time at Coordinated Universal Time(UTC)
+	-R	Output date and time in RFC 5322 format.
+		Example: Mon, 14 Aug 2006 02:34:56 -0600
+
+	--help	Display this help and exit
+
+	NOTE: Can club options together by using -uR or -Ru as flag.
+
+echo:	echo [ [-n] -e|-E ] [STRING]...
+	Echo the STRING(s) to the standard output
+
+	Options:
+
+	-n	Do not output the trailing newline
+	-e	Enable interpretation of escape sequences
+	-E	Disable interpretation of escape sequences(default)
+	--help	Display this help and exit
+
+	If -e is in effect, the following sequences are recognised:
+	\\	backslash
+	\a	alert
+	\b	backspace
+	\c	produce no further output
+	\e	escape
+	\f	form feed
+	\n	newline
+	\r	carriage return
+	\t	horizontal tab
+	\v	vertical tab
+
+	NOTE: Can club options together by using -nE | -ne or -en | -En as flag.
+
+exit:	exit [n]
+	Exit the shell.
+	
+	Exits the shell with a status of n. If n is omitted, 
+	the exit status is 0.
+
+	Options:
+	--help	Displays this help and exit
+	
+history:	history [-c|[-d offset]] number
+	Display or manipulate the history list.
+	
+	If number specified, then prints last number of commands in history.
+	By default prints the entire history in a session.
+
+	Options:
+	-c	Clear the history list by deleting all entries
+	-d	Deletes the history entry at position offset. 
+	--help	Display this help and exit
+
+ls: ls [ [-f] [-a] ] [DIR]
+	List information about DIR (current directory by default).
+
+	Sorts entries alphabetically unless -f is specified
+
+	Options:
+
+	-f	Does not sort and shows all entries
+	-a	Does not ignore entries starting with .
+	--help	Display this help and exit
+
+	NOTE: Can club options together by using -fa or -af as flag.
+
+mkdir:	mkdir [ [-v] [-m n] ] DIR...
+	Create directory(ies) DIR, if they do not exist.
+
+	Options:
+
+	-v	Prints a message for each created directory
+	-m	Set file mode like chmod. Give space seperated
+		input in octal bits. Default mode is 0775
+		
+		Example: mkdir -m 775 test
+		Creates a directory 'test' with permissions rwxrwxr-x
+	
+	--help	Display this help and then exit
+
+	NOTE: Can club options together by using [-mv n] or [-vm n] as flag.
+
+pwd:	pwd [-L|-P]
+	Print the name of current working directory.
+
+	Options:
+
+	-P	Print the physical directory, without any symbolic links
+	-L	print the value of pwd with symbolic links
+
+	By default, behaves as if -P was specified.
+
+rm:	rm [ [-i] [-d] ] FILE...
+	Remove (unlink) the FILE(s)
+
+	Options:
+	
+	-i	Prompt before every removal
+	-d	Remove empty directories
+	--help	Display this help and exit
+
+	rm does not remove directories by default. Use -d flag to 
+	remove directories.
+	
+	NOTE: Can club options together by using -id or -di as flag.
+
+Use --help flag to know more about each command!
