@@ -8,3 +8,10 @@ cat:	cat [ [-n] [-E] ] FILE...
 	--help	Display this help and exit
 
 	NOTE: Can club options together by using -nE or -En as flag.
+
+	Error Handling:
+		If the file doesn't exist the program throws an error stating that.
+	
+	Examples:
+		cat echo.c main.c 	//Prints echo.c and main.c on stdout
+		cat -nE echo.c		//Prints line number and $ at each line of echo.c

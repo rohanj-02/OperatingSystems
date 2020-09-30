@@ -18,8 +18,16 @@ unsigned int getIntFromOctal(char *str)
 	int length = i;
 	for (i = length - 1; i >= 0; i--)
 	{
-		returnVal += (int)((str[i] - 48) * (int)pow(8, j));
-		j++;
+		if (str[i] >= '0' && str[i] <= '7')
+		{
+			returnVal += (int)((str[i] - 48) * (int)pow(8, j));
+			j++;
+		}
+		else
+		{
+			printf("Mode not in Octal Bits.\nTry '--help' for more information.\n");
+			exit(1);
+		}
 	}
 	return returnVal;
 }

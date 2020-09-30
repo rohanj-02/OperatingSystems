@@ -11,7 +11,7 @@
 /* 
 1. cd, pwd
 Add Testcases
-Check that cant rm codefiles
+////Check that cant rm codefiles
 Command checklist(Docs + Error Handling):
 ////1. history
 ////2. exit
@@ -20,8 +20,8 @@ Command checklist(Docs + Error Handling):
 ////5. pwd
 ////6. ls
 ////7. rm
-8. mkdir
-9. date
+////8. mkdir
+////9. date
 10. cat
 
 */

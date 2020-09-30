@@ -19,5 +19,5 @@ history:	history [-c|[-d offset]] number
 		history		//Display history in this session
 		history 5	//Display last 5 commands
 		history -d 3	//Delete the 3rd command
-		history -c		//Clear history
+		history -c	//Clear history
 		

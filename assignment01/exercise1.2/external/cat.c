@@ -17,22 +17,20 @@ int main(int argc, char *argv[])
 	bool isLineEnd = false;
 	if (strcmp(argv[1], "--help") == 0)
 	{
-		// printf("Implements -n and -E flag !");
-		// //TODO Add documentation
 		printDocs("cat.txt");
 		return 0;
 	}
-	if (strcmp(argv[1], "-E") == 0)
+	else if (strcmp(argv[1], "-E") == 0)
 	{
 		isLineEnd = true;
 		startIndex = 2;
 	}
-	if (strcmp(argv[1], "-n") == 0)
+	else if (strcmp(argv[1], "-n") == 0)
 	{
 		isLineNumber = true;
 		startIndex = 2;
 	}
-	if ((strcmp(argv[1], "-nE") == 0) || (strcmp(argv[1], "-En") == 0))
+	else if ((strcmp(argv[1], "-nE") == 0) || (strcmp(argv[1], "-En") == 0))
 	{
 		isLineEnd = true;
 		isLineNumber = true;

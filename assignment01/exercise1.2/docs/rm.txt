@@ -23,7 +23,7 @@ rm:	rm [ [-i] [-d] ] FILE...
 
 	Examples:
 		First run make rmPopulate from terminal
-		rm test.txt 	//Remove test.txt 
-		cd test && rm -d test2	//Remove test2 directory
-		rm -di test		//Remove empty directory test after prompting user
+		rm test.txt 			//Remove test.txt 
+		cd test && rm -d test2		//Remove test2 directory
+		rm -di test			//Remove empty directory test after prompting user
 		rm -i test2.txt test3.txt	//Remove files after prompting for each file 	

@@ -8,7 +8,7 @@ extern void printDocs(char *);
 
 int main(int argc, char *argv[])
 {
-	if (strcmp(argv[1], "--help") == 0)
+	if (argv[1] != NULL && strcmp(argv[1], "--help") == 0)
 	{
 		printDocs("date.txt");
 		return 0;
@@ -17,15 +17,24 @@ int main(int argc, char *argv[])
 	struct tm *currTimeStruct = localtime(&currTime);
 	if (currTimeStruct == NULL)
 	{
-		perror("localtime error");
-		return 0;
+		perror("date: localtime error");
+		exit(1);
 	}
 	char output[256];
-	if (strcmp(argv[1], "-R") == 0)
+	if (argv[1] == NULL)
+	{
+		if (strftime(output, sizeof(output), "%A %d %B %Y %T %Z(%z)\n", currTimeStruct) == 0)
+		{
+			fprintf(stderr, "date: strftime failed!\n");
+			exit(1);
+		};
+	}
+	else if (strcmp(argv[1], "-R") == 0)
 	{
 		if (strftime(output, sizeof(output), "%a, %d %b %Y %T %z\n", currTimeStruct) == 0)
 		{
-			fprintf(stderr, "strftime failed! ");
+			fprintf(stderr, "date: strftime failed!\n");
+			exit(1);
 		};
 	}
 	else if (strcmp(argv[1], "-u") == 0)
@@ -33,13 +42,13 @@ int main(int argc, char *argv[])
 		currTimeStruct = gmtime(&currTime);
 		if (currTimeStruct == NULL)
 		{
-			perror("gmtime error");
-			return 0;
+			perror("date: gmtime error");
+			exit(1);
 		}
 		if (strftime(output, sizeof(output), "%A %d %B %Y %T %Z(%z)\n", currTimeStruct) == 0)
 		{
-			fprintf(stderr, "strftime failed! ");
-			return 0;
+			fprintf(stderr, "date: strftime failed!\n");
+			exit(1);
 		};
 	}
 	else if ((strcmp(argv[1], "-uR") == 0) || (strcmp(argv[1], "-Ru") == 0))
@@ -47,26 +56,26 @@ int main(int argc, char *argv[])
 		currTimeStruct = gmtime(&currTime);
 		if (currTimeStruct == NULL)
 		{
-			perror("gmtime error");
-			return 0;
+			perror("date: gmtime error");
+			exit(1);
 		}
 		if (strftime(output, sizeof(output), "%a, %d %b %Y %T %z\n", currTimeStruct) == 0)
 		{
-			fprintf(stderr, "strftime failed! ");
-			return 0;
+			fprintf(stderr, "date: strftime failed!\n");
+			exit(1);
 		}
 	}
 	else if (argv[1] == NULL || (strcmp(argv[1], "") == 0))
 	{
 		if (strftime(output, sizeof(output), "%A %d %B %Y %T %Z(%z)\n", currTimeStruct) == 0)
 		{
-			fprintf(stderr, "strftime failed! ");
-			return 0;
+			fprintf(stderr, "date: strftime failed!\n");
+			exit(1);
 		}
 	}
 	else
 	{
-		fprintf(stderr, "date error: %s flag not valid. Try --help to know more.\n", argv[1]);
+		fprintf(stderr, "date: %s flag not valid. Try --help to know more.\n", argv[1]);
 	}
 
 	for (int i = 0; output[i] != '\0'; i++)

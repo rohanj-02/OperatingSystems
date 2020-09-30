@@ -10,3 +10,13 @@ date:	date [ [-u] [-R] ]
 	--help	Display this help and exit
 
 	NOTE: Can club options together by using -uR or -Ru as flag.
+
+	Error Handling:
+		Print error if an error occurs while formatting string.
+		Print error if invalid flag entered
+
+	Examples:
+		date		//Print current time
+		date -R 	//Print current time in RFC 5322 format
+		date -uR 	//Print current time in UTC in RFC 5322 format
+		

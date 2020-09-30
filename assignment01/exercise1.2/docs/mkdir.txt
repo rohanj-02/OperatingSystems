@@ -5,7 +5,7 @@ mkdir:	mkdir [ [-v] [-m n] ] DIR...
 
 	-v	Prints a message for each created directory
 	-m	Set file mode like chmod. Give space seperated
-		input in octal bits. 
+		input in octal bits. Default mode is 0775
 		
 		Example: mkdir -m 775 test
 		Creates a directory 'test' with permissions rwxrwxr-x
@@ -13,3 +13,13 @@ mkdir:	mkdir [ [-v] [-m n] ] DIR...
 	--help	Display this help and then exit
 
 	NOTE: Can club options together by using [-mv n] or [-vm n] as flag.
+
+	Error Handling:
+		Throws an error if invalid mode specified.
+		Throws an error if directory already exists.
+
+	Examples:
+		mkdir trial		//Makes a directory named trial
+		mkdir -v trial2		//Makes a directory named trial2 and prints message
+		mkdir -m 755 trial3	//Makes a directory named trial3 with permissions rwxr-xr-x
+		mkdir trial4 trial5	//Create directories trial4 and trial5 
