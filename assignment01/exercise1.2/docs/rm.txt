@@ -11,3 +11,19 @@ rm:	rm [ [-i] [-d] ] FILE...
 	remove directories.
 	
 	NOTE: Can club options together by using -id or -di as flag.
+
+	Error Handling:
+		Throws error if user tries to delete any of the code files
+		required for this program.
+		Throws error if user tries to delete any file not present in
+		this directory or the user doesn't have permission to delete.
+		Throws error if try to delete a non empty directory, or an empty
+		directory without -d flag.
+
+
+	Examples:
+		First run make rmPopulate from terminal
+		rm test.txt 	//Remove test.txt 
+		cd test && rm -d test2	//Remove test2 directory
+		rm -di test		//Remove empty directory test after prompting user
+		rm -i test2.txt test3.txt	//Remove files after prompting for each file 	

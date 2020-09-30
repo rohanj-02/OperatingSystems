@@ -14,3 +14,10 @@ history:	history [-c|[-d offset]] number
 		and prints an error.
 		If a user enters flags not supported by history then the command does
 		not run and prints error.
+
+	Examples:
+		history		//Display history in this session
+		history 5	//Display last 5 commands
+		history -d 3	//Delete the 3rd command
+		history -c		//Clear history
+		

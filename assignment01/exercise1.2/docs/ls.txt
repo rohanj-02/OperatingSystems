@@ -5,8 +5,20 @@ ls: ls [ [-f] [-a] ] [DIR]
 
 	Options:
 
-	-f	Does not sort
+	-f	Does not sort and shows all entries
 	-a	Does not ignore entries starting with .
 	--help	Display this help and exit
 
 	NOTE: Can club options together by using -fa or -af as flag.
+
+	Error Handling		
+		If user gives bad input (incorrect flags) then an error is printed.
+		If getcwd() throws any error, they are logged on stdout.
+		If user enters name of directory that doesn't exist then, an error
+		will be thrown that could not fetch directory.
+
+	Examples:
+		ls		//Lists information about current directory
+		ls docs		//Lists information about directory docs inside current dir
+		ls -a docs	//Shows all files in docs directory
+		ls -f 		//Does not sort the list of files printed

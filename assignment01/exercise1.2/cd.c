@@ -11,16 +11,36 @@ void cd(char *path)
 {
 	if (path[0] != '/')
 	{
-		char pwd[256];
-		getcwd(pwd, sizeof(pwd));
-		strcat(pwd, "/");
-		strcat(pwd, path);
-		if (chdir(pwd) != 0)
+		if (path[0] == '~')
 		{
-			char err[256];
-			strcpy(err, "cd: ");
-			strcat(err, path);
-			perror(err);
+			char x[256];
+			strcpy(x, getenv("HOME"));
+			if (chdir(x) != 0)
+			{
+				char err[256];
+				strcpy(err, "cd: ");
+				strcat(err, path);
+				perror(err);
+			}
+		}
+		else
+		{
+
+			char pwd[256];
+			if (getcwd(pwd, sizeof(pwd)) == NULL)
+			{
+				perror("cd: getcwd() error");
+				return;
+			}
+			strcat(pwd, "/");
+			strcat(pwd, path);
+			if (chdir(pwd) != 0)
+			{
+				char err[256];
+				strcpy(err, "cd: ");
+				strcat(err, path);
+				perror(err);
+			}
 		}
 	}
 	else

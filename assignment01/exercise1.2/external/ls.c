@@ -18,7 +18,12 @@ char *getPath(char *argv[], char *path)
 		if (argv[index][0] != '/')
 		{
 			char pwd[256];
-			getcwd(pwd, sizeof(pwd));
+			if (getcwd(pwd, sizeof(pwd)) == NULL)
+			{
+				perror("ls: getcwd() error");
+				printf("Try '--help' for more information.\n");
+				exit(1);
+			}
 			strcat(pwd, "/");
 			strcat(pwd, argv[index]);
 			strcpy(path, pwd);
@@ -31,7 +36,12 @@ char *getPath(char *argv[], char *path)
 	else
 	{
 		char pwd[256];
-		getcwd(pwd, sizeof(pwd));
+		if (getcwd(pwd, sizeof(pwd)) == NULL)
+		{
+			perror("ls: getcwd() error");
+			printf("Try '--help' for more information.\n");
+			exit(1);
+		}
 		strcpy(path, pwd);
 	}
 	return path;
@@ -55,7 +65,8 @@ int getList(DIR *currDir, char **fileNames)
 	}
 	else
 	{
-		perror("Could not open directory! ");
+		perror("ls: Could not open specified directory!");
+		printf("Try '--help' for more information.\n");
 	}
 	return counter;
 }

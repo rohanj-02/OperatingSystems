@@ -10,14 +10,16 @@
 // TODO
 /* 
 1. cd, pwd
+Add Testcases
+Check that cant rm codefiles
 Command checklist(Docs + Error Handling):
 ////1. history
 ////2. exit
-3. cd Add ~ support
-4. echo
+////3. cd Add ~ support
+////4. echo
 ////5. pwd
-6. ls
-7. rm
+////6. ls
+////7. rm
 8. mkdir
 9. date
 10. cat

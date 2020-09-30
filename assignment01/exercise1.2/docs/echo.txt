@@ -21,3 +21,13 @@ echo:	echo [ [-n] -e|-E ] [STRING]...
 	\v	vertical tab
 
 	NOTE: Can club options together by using -nE | -ne or -en | -En as flag.
+
+	Error Handling:
+		No error handling required. If a user enters an invalid flag
+		echo just prints it back.
+
+	Examples:
+		echo hello		//Print hello
+		echo -n "hello"		//Print hello without trailing newline
+		echo -e hello\nrohan\b	//Print hello and roha in different lines
+		echo -E hello\n		//Print hello\n

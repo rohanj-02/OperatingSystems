@@ -1,4 +1,4 @@
-cd: cd [-P] [dir]
+cd: cd [-P [-e]] [dir]
     Change the shell working directory.
     
     Change the current directory to DIR.  The default DIR is the value of the
@@ -9,5 +9,19 @@ cd: cd [-P] [dir]
     Options:
 
     -P  Use the physical directory structure without following symbolic links
+    -P -e   Exit with a non-zero status is cannot resolve current working directory
+    ~   cd to HOME directory
     --help  Display this help and exit
     
+    Error Handling:
+        If user tries to cd into a directory where it does not have permissions 
+        or the directory doesn't exist, an error is printed.
+        If user gives bad input (incorrect flags) then an error is printed.
+        If getcwd() throws any error, they are logged on stdout
+
+    Examples:
+        cd docs     //Change directory to docs
+        cd -P docs  //Change directory to docs without following symbolic links 
+        cd ..       //Change to parent directory
+        cd ~        //Change to HOME directory
+        

@@ -10,3 +10,8 @@ exit:	exit [n]
 	Error Handling:
 		If a user enters a non-integer status code, then an error is
 		printed.
+
+	Examples:
+		exit	//Exit the shell
+		exit 1	//Exit with status code 1
+		

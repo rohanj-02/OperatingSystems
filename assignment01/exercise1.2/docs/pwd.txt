@@ -13,3 +13,8 @@ pwd:	pwd [-L|-P]
 		not run and prints error.
 		If program cannot access cwd using getcwd() then throws the error
 		as defined by errno via perror() call.
+
+	Examples:
+		pwd 		//Print current working directory
+		pwd -P 		//Print current working directory without symbolic links
+		
