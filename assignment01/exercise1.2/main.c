@@ -7,15 +7,21 @@
 #include <stdbool.h>
 
 // TODO Add error handling, if a command has only one word and no spaces at the end then segfault.
-// TODO if command has one word and space at end it works...
 // TODO
 /* 
 1. cd, pwd
-////2. history one more flag
-////3. ls check -t (maybe implement -h or -r for reverse)
-////	ls -t definitely wrong. In ls, convert to lowercase to compare.
-////4. Error handling when no space at end
-5. Documentation and help flags.
+Command checklist(Docs + Error Handling):
+////1. history
+////2. exit
+3. cd Add ~ support
+4. echo
+////5. pwd
+6. ls
+7. rm
+8. mkdir
+9. date
+10. cat
+
 */
 
 extern void runcd(char **);
@@ -150,7 +156,7 @@ void deleteHistory(int offset)
 {
 	if (offset > CURRENT_HISTORY || offset <= 0)
 	{
-		printf("%d: Offset position out of range!\n", offset);
+		printf("history: %d: Offset position out of range!\nTry '--help' for more information.\n", offset);
 		return;
 	}
 	for (int i = offset - 1; i < CURRENT_HISTORY - 1; i++)
@@ -158,6 +164,99 @@ void deleteHistory(int offset)
 		HISTORY[i] = HISTORY[i + 1];
 	}
 	CURRENT_HISTORY--;
+}
+
+void history(char **input)
+{
+	if (input[1] != NULL)
+	{
+		if (strcmp(input[1], "-c") == 0)
+		{
+			MAX_HISTORY = 10;
+			CURRENT_HISTORY = 0;
+			HISTORY = (char **)calloc(MAX_HISTORY, sizeof(char *));
+			printf("history: History Cleared!\n");
+		}
+		else if (strcmp(input[1], "-d") == 0)
+		{
+			if (input[2] == NULL)
+			{
+				printf("history: -d requires a numerical offset to delete history.\nTry '--help' for more information.\n");
+				return;
+			}
+			else if (!isNum(input[2]))
+			{
+				printf("history: %s: Offset position out of range!\nTry '--help' for more information.\n", input[2]);
+				return;
+			}
+			deleteHistory(atoi(input[2]));
+		}
+		else if (strcmp(input[1], "--help") == 0)
+		{
+			printDocs("history.txt");
+		}
+		else
+		{
+			if (isNum(input[1]))
+			{
+				showHistory(atoi(input[1]));
+			}
+			else
+			{
+				if ((input[1][0] == '-') && (input[1][1] < '0' || input[1][1] > '9'))
+				{
+					printf("history: %s: Flag not supported.\nTry '--help' for more information.\n", input[1]);
+				}
+				else
+				{
+					printf("history: %s: Position out of range!\nTry '--help' for more information.\n", input[1]);
+				}
+			}
+		}
+	}
+	else
+	{
+		showHistory(-1);
+	}
+}
+
+void pwd(char **input)
+{
+	bool isP = true;
+	if (input[1] != NULL)
+	{
+		if (strcmp(input[1], "--help") == 0)
+		{
+			isP = false;
+			printDocs("pwd.txt");
+		}
+		else if (strcmp(input[1], "-L") == 0)
+		{
+			isP = false;
+			printf("pwd: Not implemented yet\n");
+		}
+		else if (strcmp(input[1], "-P") == 0)
+		{
+			isP = true;
+		}
+		else
+		{
+			isP = false;
+			printf("pwd: %s: Flag not supported!\nTry '--help' for more information!\n", input[1]);
+		}
+	}
+	if (isP)
+	{
+		char pwd[256];
+		if (getcwd(pwd, sizeof(pwd)) == NULL)
+		{
+			perror("pwd: getcwd() error");
+		}
+		else
+		{
+			printf("%s\n", pwd);
+		}
+	}
 }
 
 void handleInternal(char **input)
@@ -172,8 +271,15 @@ void handleInternal(char **input)
 			}
 			else
 			{
-				printf("Exiting with status code %d\n", atoi(input[1]));
-				exit(atoi(input[1]));
+				if (isNum(input[1]))
+				{
+					printf("Exiting with status code %d\n", atoi(input[1]));
+					exit(atoi(input[1]));
+				}
+				else
+				{
+					printf("exit: Status should be an integer!\nTry '--help' for more information!\n");
+				}
 			}
 		}
 		else
@@ -184,49 +290,7 @@ void handleInternal(char **input)
 	}
 	else if (strcmp(input[0], "history") == 0)
 	{
-		if (input[1] != NULL)
-		{
-			if (strcmp(input[1], "-c") == 0)
-			{
-				MAX_HISTORY = 10;
-				CURRENT_HISTORY = 0;
-				HISTORY = (char **)calloc(MAX_HISTORY, sizeof(char *));
-				printf("History Cleared!\n");
-			}
-			else if (strcmp(input[1], "-d") == 0)
-			{
-				if (input[2] == NULL)
-				{
-					printf("-d requires a numerical offset to delete history. Try '--help' for more information.\n");
-					return;
-				}
-				else if (!isNum(input[2]))
-				{
-					printf("%s: Offset position out of range!\n", input[2]);
-					return;
-				}
-				deleteHistory(atoi(input[2]));
-			}
-			else if (strcmp(input[1], "--help") == 0)
-			{
-				printDocs("history.txt");
-			}
-			else
-			{
-				if (isNum(input[1]))
-				{
-					showHistory(atoi(input[1]));
-				}
-				else
-				{
-					printf("%s: Position out of range!\n", input[1]);
-				}
-			}
-		}
-		else
-		{
-			showHistory(-1);
-		}
+		history(input);
 	}
 	else if (strcmp(input[0], "cd") == 0)
 	{
@@ -234,36 +298,7 @@ void handleInternal(char **input)
 	}
 	else if (strcmp(input[0], "pwd") == 0)
 	{
-		bool isP = true;
-		if (input[1] != NULL)
-		{
-			if (strcmp(input[1], "--help") == 0)
-			{
-				isP = false;
-				printDocs("pwd.txt");
-			}
-			else if (strcmp(input[1], "-L") == 0)
-			{
-				isP = false;
-				printf("Not implemented yet");
-			}
-			else
-			{
-				isP = true;
-			}
-		}
-		if (isP)
-		{
-			char pwd[256];
-			if (getcwd(pwd, sizeof(pwd)) == NULL)
-			{
-				perror("getcwd() error");
-			}
-			else
-			{
-				printf("pwd is : %s\n", pwd);
-			}
-		}
+		pwd(input);
 	}
 	else if (strcmp(input[0], "echo") == 0)
 	{
@@ -275,7 +310,7 @@ void handleInternal(char **input)
 	}
 	else
 	{
-		printf("Bad Input!\n");
+		printf("internal: Shell Internal Command Error! This error should never be thrown\n");
 	}
 }
 
@@ -284,7 +319,7 @@ void handleExternal(char **input)
 	pid_t process = fork();
 	if (process == -1)
 	{
-		perror("Could not spawn child process ");
+		perror("shell: Could not spawn child process");
 		return;
 	}
 	if (process == 0)
@@ -296,27 +331,35 @@ void handleExternal(char **input)
 		if (execvp(path, input) == -1)
 		{
 			char errorMsg[256];
-			sprintf(errorMsg, "Could not run command: %s\nTry help for more information", input[0]);
+			sprintf(errorMsg, "Could not run command: %s\nTry 'help' for more information", input[0]);
 			perror(errorMsg);
+			exit(1);
 		}
 		exit(0);
 	}
 	else
 	{
-		waitpid(-1, NULL, 0);
+		if (waitpid(-1, NULL, 0) == -1)
+		{
+			perror("wait: error");
+			exit(1);
+		}
 		return;
 	}
 }
 
 void executeCommands(char **input)
 {
-	if (isInternal(input[0]))
+	if (input[0] != NULL)
 	{
-		handleInternal(input);
-	}
-	else
-	{
-		handleExternal(input);
+		if (isInternal(input[0]))
+		{
+			handleInternal(input);
+		}
+		else
+		{
+			handleExternal(input);
+		}
 	}
 	return;
 }
@@ -360,50 +403,15 @@ void printDefaultPath()
 
 int main(int argc, char *argv[])
 {
-	/* 
-	Plan:
-		1. Make a parser for commands
-		2. Define internal commands
-		3. Read about exec() family manpage
-		4. Make function to execute external commands
-		5. Handle errors that can happen 
-		6. Check how you can implement only the specific external commands and not all external commands
-	*/
 	HISTORY = (char **)calloc(MAX_HISTORY, sizeof(char *));
 	system("clear");
-	// char command[MAX_LENGTH];
 	while (IS_RUNNING)
 	{
-		// char pwd[256];
-		// getcwd(pwd, sizeof(pwd));
-		// printf("%s$ ", pwd);
 		printDefaultPath();
-		// if (!fgets(command, MAX_LENGTH, stdin))
-		// {
-		// 	break;
-		// }
-		// if (command[strlen(command) - 1] == '\n')
-		// {
-		// 	command[strlen(command) - 1] = '\0';
-		// }
-		// HISTORY[CURRENT_HISTORY] = command;
-		// CURRENT_HISTORY++;
-		// if (CURRENT_HISTORY >= MAX_HISTORY)
-		// {
-		// 	char **temp = realloc(HISTORY, 2 * MAX_HISTORY * sizeof(char *));
-		// 	HISTORY = temp;
-		// 	MAX_HISTORY *= 2;
-		// }
-		// printf("%s", command);
 		char **input = getArguments();
 		executeCommands(input);
-		// for (int i = 0; i < NUMBER_OF_ARGUMENTS; i++)
-		// {
-		// 	printf("Pointer:%p Value:%s Length:%ld\n", *input[i], input[i], strlen(input[i]));
-		// }
 		free(input);
 	}
 	free(HISTORY);
-
 	return 0;
 }

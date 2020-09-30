@@ -7,3 +7,6 @@ exit:	exit [n]
 	Options:
 	--help	Displays this help and exit
 	 
+	Error Handling:
+		If a user enters a non-integer status code, then an error is
+		printed.

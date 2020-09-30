@@ -4,5 +4,12 @@ pwd:	pwd [-L|-P]
 	Options:
 
 	-P	Print the physical directory, without any symbolic links
+	-L	print the value of pwd with symbolic links
 
 	By default, behaves as if -P was specified.
+
+	Error Handling: 
+		If a user enters flags not supported by pwd then the command does
+		not run and prints error.
+		If program cannot access cwd using getcwd() then throws the error
+		as defined by errno via perror() call.

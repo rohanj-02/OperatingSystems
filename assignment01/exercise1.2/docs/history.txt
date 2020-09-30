@@ -8,3 +8,9 @@ history:	history [-c|[-d offset]] number
 	-c	Clear the history list by deleting all entries
 	-d	Deletes the history entry at position offset. 
 	--help	Display this help and exit
+
+	Error Handling:
+		If a user enters out of range offset/number the command does not run
+		and prints an error.
+		If a user enters flags not supported by history then the command does
+		not run and prints error.

@@ -18,7 +18,7 @@ void printDocs(char *str)
 	strcat(copy, str);
 	if ((fileDescriptor = open(copy, O_RDONLY)) < 0)
 	{
-		printf("Could not find file %s", copy);
+		printf("Could not find file %s\n", copy);
 	}
 	else
 	{

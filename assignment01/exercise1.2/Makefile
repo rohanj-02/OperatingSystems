@@ -14,3 +14,6 @@ clean:
 	@cd external && make clean
 	@rm main
 	@rm -rf test test.txt
+
+run: default
+	./main
