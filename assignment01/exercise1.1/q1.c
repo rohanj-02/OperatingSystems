@@ -1,3 +1,5 @@
+// Written by Rohan Jain 2019095
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -174,7 +176,8 @@ int main(int argc, char *argv[])
 	process = fork();
 	if (process == -1)
 	{
-		printf("Could not spawn child process");
+		perror("fork: error");
+		// printf("Could not spawn child process");
 		exit(1);
 	}
 	if (process == 0)

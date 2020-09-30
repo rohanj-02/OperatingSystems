@@ -1,0 +1,55 @@
+Question 1
+
+The program firstly uses the fork() system call to create a duplicate process.
+
+In the child process, I call parseCsv function to print the averages of student in section A and in the parent process i use waitpid() system call to wait for the child process to finish and then I call parseCsv again to start printing the averages of the students in section B.
+
+In parseCsv, I open the file by using the open() system call. I read the file byte by byte in an infinite loop. If read() system call returns a 0 (indicating end of file), I break out of the loop. When one row is read, I check if the section is A or B and proceed accordingly. I create a struct of that student record, compute its average and print the student details using the write() system call.
+
+System calls:
+
+1. fork():
+	No parameters are required. 
+	It creates a duplicate of the process calling it. 
+	It returns 0 to child process, child pid to parent process and -1 to parent if process could not be created. 
+	On returning -1, errno is also set and I log the error to stdout using perror.
+2. waitpid(): 
+	It requires 3 parameters, pid_t pid, int *wstatus, int options. 
+	It is used to wait for state changes in a child process. 
+	By default waitpid waits for terminated children. 
+	I have used it as waitpid(-1, NULL, 0).
+	Here, -1 means wait for all child processes. NULL,0 means to wait for the termination of children(Default value).
+	waitpid() returns -1 on error and child pid on success.
+	On returning -1, errno is also set and I log the error to stdout using perror.
+3. open():
+	It requires 2 parameters, char *path & int flags.
+	It opens the file given at path
+	It returns the file descriptor or -1 in case of failure.
+	On returning -1, errno is also set and I log the error to stdout using perror.
+4. read():
+	It requires 3 parameters, int fd, void *buf, size_t count.
+	It reads count number of bytes from file descriptor fd into memory starting at buf.
+	It returns 0 if End of file, -1 if error and number of bytes read on success.
+	On returning -1, errno is also set and I log the error to stdout using perror.
+5. write():
+	It requires 3 parameters, int fd, void *buf, size_t count.
+	It writes count number of bytes from memory starting at buf to file descriptor fd.
+	It returns -1 if error and number of bytes written if success.
+	On returning -1, errno is also set and I log the error to stdout using perror.
+6. close():
+	It requires 1 parameter, int fd.
+	It closes a file descriptor fd.
+	It returns -1 if error and 0 on success.
+	On returning -1, errno is also set and I log the error to stdout using perror.
+7. exit():
+	It requires 1 parameter, int status.
+	It terminates the calling process with status code status immediately.
+	It does not return anything.
+	I have used this system call to stop the process whenever an error is logged.
+    
+Error Handling:
+
+In every system call, I have added an if else block that checks whether the system call returned a success or failure. If the system call returned an integer specifying failure then I call perror and log the error on the console.
+
+Rohan Jain
+2019095
