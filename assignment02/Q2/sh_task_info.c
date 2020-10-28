@@ -1,15 +1,6 @@
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/syscalls.h>
-// #include <linux/init.h>
-// #include <linux/module.h>
-// #include <linux/file.h>
-// #include <linux/fcntl.h>
-// #include <linux/fs.h>
-// #include <linux/uaccess.h>
-// #include <asm/segment.h>
-// #include <asm/uaccess.h>
-// #include <linux/buffer_head.h>
 #include <asm/errno.h>
 
 #define MY_SIZE_TEMP 256
