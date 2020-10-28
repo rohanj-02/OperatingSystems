@@ -41,38 +41,38 @@ int set_output(char *output, struct task_struct *task){
 	
 	//PID
 	//type pid_t or int
-	len += scnprintf(output, MY_SIZE_OUTPUT, "PID = %d\n", task->pid);
+	len += scnprintf(output, MY_SIZE_OUTPUT, "PID: %d\n", task->pid);
 
     //STATE 
     //TYPE: volatile long 
 	switch(task->state){
 		case -1:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "State = %ld (Unrunnable)\n", task->state);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "State: %ld (Unrunnable)\n", task->state);
     		break;
     	case 0:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "State = %ld (TASK_RUNNING)\n", task->state);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "State: %ld (TASK_RUNNING)\n", task->state);
     		break;
     	case 1:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "State = %ld (TASK_INTERRUPTIBLE)\n", task->state);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "State: %ld (TASK_INTERRUPTIBLE)\n", task->state);
     		break;
     	case 2:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "State = %ld (TASK_UNINTERRUPTIBLE)\n", task->state);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "State: %ld (TASK_UNINTERRUPTIBLE)\n", task->state);
     		break;
     	case 4: 
-    		len += scnprintf(temp, MY_SIZE_TEMP, "State = %ld (TASK_ZOMBIE)\n", task->state);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "State: %ld (TASK_ZOMBIE)\n", task->state);
     		break;
     	case 8:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "State = %ld (TASK_STOPPED)\n", task->state);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "State: %ld (TASK_STOPPED)\n", task->state);
     		break;
     	default:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "State = %ld (Unknown)\n", task->state);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "State: %ld (Unknown)\n", task->state);
 			break;
 	}
   	strncat(output, temp, MY_SIZE_TEMP);
 
     //REALTIME PRIORITY
     //type: unsigned int
-    len += scnprintf(temp, MY_SIZE_TEMP, "Real Time Priority = %u\n", task->rt_priority);
+    len += scnprintf(temp, MY_SIZE_TEMP, "Real Time Priority: %u\n", task->rt_priority);
   	strncat(output, temp, MY_SIZE_TEMP);
     // printk(KERN_INFO "Real time Priority: %u\n", task->rt_priority);
     
@@ -80,19 +80,19 @@ int set_output(char *output, struct task_struct *task){
     //type: unsigned int
     switch(task->policy){
     	case 0:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy = %u (SCHED_NORMAL)\n", task->policy);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy: %u (SCHED_NORMAL)\n", task->policy);
     		break;
   		case 1:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy = %u (SCHED_FIFO)\n", task->policy);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy: %u (SCHED_FIFO)\n", task->policy);
   			break;
   		case 2:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy = %u (SCHED_RR)\n", task->policy);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy: %u (SCHED_RR)\n", task->policy);
   			break;
   		case 3:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy = %u (SCHED_BATCH)\n", task->policy);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy: %u (SCHED_BATCH)\n", task->policy);
     		break;
   		default:
-    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy = %u (Unknown)\n", task->policy);
+    		len += scnprintf(temp, MY_SIZE_TEMP, "Scheduling Policy: %u (Unknown)\n", task->policy);
     		break;
     }
     strncat(output, temp, MY_SIZE_TEMP);
@@ -115,30 +115,30 @@ int set_output(char *output, struct task_struct *task){
   	return len;
 }
 
-int open_file(struct file *fileptr, char *filepath){
+// int open_file(struct file *fileptr, char *filepath){
 	
-	//Error ENAMETOOLONG 36 File name too long
-	if(strlen(filepath) >= 255) {
-    	printk(KERN_ERR "File name too long!");
-    	errno = ENAMETOOLONG;
-    	return -1 * errno;
-    }
-    //Error ENOENT 2 No such file or directory
-    if(check_file_path(filepath) == -1){
-    	printk(KERN_ERR "File cannot be opened!\n");
-    	errno = ENOENT;
-    	return -1 * errno;
-    }
-    //File Open
-    fileptr = filp_open(filepath, O_WRONLY | O_CREAT, 0666);
-    //Error ENOENT 2 No such file or directory
-    if(fileptr == NULL){
-    	printk(KERN_ERR "File cannot be opened!\n");
-    	errno = ENOENT;
-    	return -1 * errno;     	
-    }
-    return 0;
-}
+// 	//Error ENAMETOOLONG 36 File name too long
+// 	if(strlen(filepath) >= 255) {
+//     	printk(KERN_ERR "File name too long!");
+//     	errno = ENAMETOOLONG;
+//     	return -1 * errno;
+//     }
+//     //Error ENOENT 2 No such file or directory
+//     if(check_file_path(filepath) == -1){
+//     	printk(KERN_ERR "File cannot be opened!\n");
+//     	errno = ENOENT;
+//     	return -1 * errno;
+//     }
+//     //File Open
+//     fileptr = filp_open(filepath, O_WRONLY | O_CREAT, 0666);
+//     //Error ENOENT 2 No such file or directory
+//     if(fileptr == NULL){
+//     	printk(KERN_ERR "File cannot be opened!\n");
+//     	errno = ENOENT;
+//     	return -1 * errno;     	
+//     }
+//     return 0;
+// }
 
 SYSCALL_DEFINE2(sh_task_info, pid_t, pid, char*, file_name)
 {
@@ -172,13 +172,33 @@ SYSCALL_DEFINE2(sh_task_info, pid_t, pid, char*, file_name)
 
     copy_from_user(filepath, file_name, 256);
     
-    // Open File
-	x = open_file(fileptr, filepath);
-    //Error in file opening
-    if(x != 0){
-    	return x;
+    // FILE OPEN
+    //Error ENAMETOOLONG 36 File name too long
+	if(strlen(filepath) >= 255) {
+    	printk(KERN_ERR "File name too long!");
+    	errno = ENAMETOOLONG;
+    	return -1 * errno;
     }
+    //Error ENOENT 2 No such file or directory
+    if(check_file_path(filepath) == -1){
+    	printk(KERN_ERR "File cannot be opened!\n");
+    	errno = ENOENT;
+    	return -1 * errno;
+    }
+    fileptr = filp_open(filepath, O_WRONLY | O_CREAT, 0666);
+    //Error ENOENT 2 No such file or directory
+    if(fileptr == NULL){
+    	printk(KERN_ERR "File cannot be opened!\n");
+    	errno = ENOENT;
+    	return -1 * errno;     	
+    }
+	// x = open_file(fileptr, filepath);
+ //    //Error in file opening
+ //    if(x != 0){
+ //    	return x;
+ //    }
 
+    //FILE WRITE
     pos = 0;
 
 	// for(filepath_len = 0; filepath[filepath_len] != '\0'; i++);
@@ -199,7 +219,9 @@ SYSCALL_DEFINE2(sh_task_info, pid_t, pid, char*, file_name)
     //Close File
     filp_close(fileptr, NULL);
     // printk(KERN_INFO "Return Val: %ld", returnVal);
+    printk(KERN_EMERG "Hello! Did I just print on my terminal?");
     printk(KERN_INFO "");
+    printk(KERN_INFO "hello");
 	/* Monotonic time in nsecs: */
 	// u64				start_time;
     return 0;
