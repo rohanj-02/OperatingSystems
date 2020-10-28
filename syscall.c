@@ -40,11 +40,11 @@ int set_output(char *output, struct task_struct *task){
 	len = 0;
 	
 	//PID
-	//type pid_t or int
+	//type: pid_t or int
 	len += scnprintf(output, MY_SIZE_OUTPUT, "PID: %d\n", task->pid);
 
     //STATE 
-    //TYPE: volatile long 
+    //type: volatile long 
 	switch(task->state){
 		case -1:
     		len += scnprintf(temp, MY_SIZE_TEMP, "State: %ld (Unrunnable)\n", task->state);
@@ -74,7 +74,6 @@ int set_output(char *output, struct task_struct *task){
     //type: unsigned int
     len += scnprintf(temp, MY_SIZE_TEMP, "Real Time Priority: %u\n", task->rt_priority);
   	strncat(output, temp, MY_SIZE_TEMP);
-    // printk(KERN_INFO "Real time Priority: %u\n", task->rt_priority);
     
     //SCHEDULING POLICY
     //type: unsigned int
@@ -96,56 +95,31 @@ int set_output(char *output, struct task_struct *task){
     		break;
     }
     strncat(output, temp, MY_SIZE_TEMP);
-    // printk(KERN_INFO "Policy: %u\n", task->policy);
 
   	//NUMBER OF CPUs ALLOWED
 	//type: int
     len += scnprintf(temp, MY_SIZE_TEMP,"Number of CPUs allowed: %d\n", task->nr_cpus_allowed);
-  	strncat(output, temp, MY_SIZE_TEMP);
-    // printk(KERN_INFO "Number of CPUs allowed: %d\n", task->nr_cpus_allowed);
-    
+  	strncat(output, temp, MY_SIZE_TEMP);    
 
-    // char comm[16] for comand name
     
+    //COMMAND NAME
+    //type: char[16]
+    len += scnprintf(temp, MY_SIZE_TEMP, "Command name: %s\n", task->comm);
+    strncat(output, temp, MY_SIZE_TEMP);
+
     //CONTEXT SWITCH COUNT
     //type: unsigned long
     len += scnprintf(temp, MY_SIZE_TEMP,"Number of context switch done: %lu\n", task->nvcsw);
   	strncat(output, temp, MY_SIZE_TEMP);
-    // printk(KERN_INFO "Number of context switch done: %lu\n", task->nvcsw);
   	return len;
 }
-
-// int open_file(struct file *fileptr, char *filepath){
-	
-// 	//Error ENAMETOOLONG 36 File name too long
-// 	if(strlen(filepath) >= 255) {
-//     	printk(KERN_ERR "File name too long!");
-//     	errno = ENAMETOOLONG;
-//     	return -1 * errno;
-//     }
-//     //Error ENOENT 2 No such file or directory
-//     if(check_file_path(filepath) == -1){
-//     	printk(KERN_ERR "File cannot be opened!\n");
-//     	errno = ENOENT;
-//     	return -1 * errno;
-//     }
-//     //File Open
-//     fileptr = filp_open(filepath, O_WRONLY | O_CREAT, 0666);
-//     //Error ENOENT 2 No such file or directory
-//     if(fileptr == NULL){
-//     	printk(KERN_ERR "File cannot be opened!\n");
-//     	errno = ENOENT;
-//     	return -1 * errno;     	
-//     }
-//     return 0;
-// }
 
 SYSCALL_DEFINE2(sh_task_info, pid_t, pid, char*, file_name)
 {
 	
 	struct task_struct *task;
     char filepath[MY_SIZE_FILENAME], output[MY_SIZE_OUTPUT];
-    int len, x;
+    int len;
 	struct file *fileptr;
     loff_t pos;
 	ssize_t returnVal;
@@ -172,7 +146,7 @@ SYSCALL_DEFINE2(sh_task_info, pid_t, pid, char*, file_name)
 
     copy_from_user(filepath, file_name, 256);
     
-    // FILE OPEN
+    //FILE OPEN
     //Error ENAMETOOLONG 36 File name too long
 	if(strlen(filepath) >= 255) {
     	printk(KERN_ERR "File name too long!");
@@ -185,6 +159,7 @@ SYSCALL_DEFINE2(sh_task_info, pid_t, pid, char*, file_name)
     	errno = ENOENT;
     	return -1 * errno;
     }
+    //Open file
     fileptr = filp_open(filepath, O_WRONLY | O_CREAT, 0666);
     //Error ENOENT 2 No such file or directory
     if(fileptr == NULL){
@@ -192,21 +167,9 @@ SYSCALL_DEFINE2(sh_task_info, pid_t, pid, char*, file_name)
     	errno = ENOENT;
     	return -1 * errno;     	
     }
-	// x = open_file(fileptr, filepath);
- //    //Error in file opening
- //    if(x != 0){
- //    	return x;
- //    }
 
     //FILE WRITE
     pos = 0;
-
-	// for(filepath_len = 0; filepath[filepath_len] != '\0'; i++);
-    
-    // printk(KERN_INFO "Opened File Successfully\n");
-    
-    // len = scnprintf(data, 500, "State: %ld\nReal time Priority: %u\nPolicy: %u\nNumber of CPUs allowed: %d\nPID: %d\nNumber of context switch done:%lu\n", task->state, task-> rt_priority, task->policy, task->nr_cpus_allowed, task->pid, task-> nvcsw);
-    
     returnVal = kernel_write(fileptr, output, len, &pos);
     
     //Error EIO 5 I/O Error, Could not write full data to file!
@@ -218,11 +181,5 @@ SYSCALL_DEFINE2(sh_task_info, pid_t, pid, char*, file_name)
     
     //Close File
     filp_close(fileptr, NULL);
-    // printk(KERN_INFO "Return Val: %ld", returnVal);
-    printk(KERN_EMERG "Hello! Did I just print on my terminal?");
-    printk(KERN_INFO "");
-    printk(KERN_INFO "hello");
-	/* Monotonic time in nsecs: */
-	// u64				start_time;
     return 0;
 }
