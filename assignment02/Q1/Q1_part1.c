@@ -50,7 +50,6 @@ int main(int argc, char *argv[])
 	}
 	else if (pid == 0)
 	{
-		// changeGlobalVariable(100, -1, "Child Process");
 		printf("Child process running! PID is: %ld\n", (long)getpid());
 		decrementUptoMin(-90, "Child Process");
 		printf("Terminating Child Process! \n");
@@ -58,7 +57,6 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		// changeGlobalVariable(90, 1, "Parent Process");
 		printf("Parent Process running! PID is: %ld\n", (long)getpid());
 		incrementUptoMax(100, "Parent Process");
 		if (waitpid(-1, NULL, 0) == -1)
