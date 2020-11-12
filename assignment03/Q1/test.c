@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 
 #define SYSCALL_NUMBER 440
 #define LOOP_END 10000000000
@@ -29,15 +30,19 @@ double get_time()
 
 int main(int argc, char **argv)
 {
-	pid_t pid, fork_pid;
-	long long srt_val;
+	pid_t fork_pid;
+	long long srt_val1, srt_val2;
 	long int sys_return;
 
-	printf("Enter pid(-1 to send pid of this process): ");
-	scanf("%d", &pid);
-	printf("Enter soft realtime requirements: ");
-	scanf("%lld", &srt_val);
+	printf("Enter soft realtime requirements for child: ");
+	scanf("%lld", &srt_val1);
 
+	printf("Enter soft realtime requirements for parent: ");
+	scanf("%lld", &srt_val2);
+	
+	srt_val1 *= 1000000000;
+	srt_val2 *= 1000000000;
+	
 	fork_pid = fork();
 	if (fork_pid == -1)
 	{
@@ -46,12 +51,8 @@ int main(int argc, char **argv)
 	}
 	else if (fork_pid == 0)
 	{
-		if (pid == -1)
-		{
-			pid = getpid();
-		}
 		// Converting seconds to nanoseconds because syscall takes nanoseconds as param
-		sys_return = syscall(SYSCALL_NUMBER, pid, srt_val * 1000000000);
+		sys_return = syscall(SYSCALL_NUMBER, getpid(), srt_val1);
 		if (sys_return != 0)
 		{
 			perror("rtnice: error");
@@ -59,13 +60,22 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			printf("Time taken with soft realtime requirements: %f\n", get_time());
+			printf("Time taken with soft realtime requirements of %lld: %f\n", srt_val1, get_time());
 		}
 		exit(0);
 	}
 	else
 	{
-		printf("Time taken normally: %f\n", get_time());
+		sys_return = syscall(SYSCALL_NUMBER, getpid(), srt_val2);
+		if (sys_return != 0)
+		{
+			perror("rtnice: error");
+			return -1;
+		}
+		else
+		{
+			printf("Time taken with soft realtime requirements of %lld: %f\n", srt_val2, get_time());
+		}
 		if (waitpid(-1, NULL, 0) == -1)
 		{
 			perror("wait: error");
