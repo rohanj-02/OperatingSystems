@@ -1,12 +1,7 @@
-# OS-Assignment-2
+# OS-Assignment-3
 
-## Do not add any extra files. Stricly follow the format given below.
+## Modifying CFS Scheduler
 
-## Fill your Name and Roll_number field in the top of every C file Provided in the question.
-
-
-## Instructions for Question-1
-1. Copy your diff in the given diff.txt (No screenshots or pdfs are accepted)
-2. Use test.c to test your implemented syscall and error handling
-3. You don't need to change the Makefile provided.
-4. Submit the writeup as writeup.pdf
+### Error Handling
+1. EINVAL thrown when pid < 0 or soft_realtime < 0.
+2. ESRCH thrown when task_struct corresponding to pid not found.
