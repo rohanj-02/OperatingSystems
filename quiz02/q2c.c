@@ -8,10 +8,12 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#define MAX_SIZE 501
+
 struct data
 {
 	long mtype;
-	char input[500];
+	char input[MAX_SIZE];
 };
 
 //Receiver
@@ -35,9 +37,9 @@ int main(void)
 		exit(1);
 	}
 
-	for (;;)
+	while (1)
 	{
-		if (msgrcv(msqid, &buffer, 500, 0, 0) == -1)
+		if (msgrcv(msqid, &buffer, MAX_SIZE - 1, 0, 0) == -1)
 		{
 			perror("msgrcv");
 			exit(1);

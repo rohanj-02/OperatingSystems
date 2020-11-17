@@ -8,16 +8,18 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-//Sender
+#define MAX_SIZE 501
 
 //TODO System V or IPC?
 //TODO Race condition?
 //TODO One weird symbol between the two processes
 //TODO CHeck all error handling
+
+//Sender
 struct data
 {
 	long mtype;
-	char input[500];
+	char input[MAX_SIZE];
 };
 
 int main(void)
@@ -26,7 +28,7 @@ int main(void)
 	key_t key;
 	int msqid;
 	int fptr;
-	char file_input[500];
+	char file_input[MAX_SIZE];
 
 	fptr = open("./para1.txt", O_RDONLY);
 	if (fptr == -1)
@@ -50,7 +52,7 @@ int main(void)
 	}
 
 	// Read the file and tokenize it
-	if (read(fptr, &file_input, 500) == -1)
+	if (read(fptr, &file_input, MAX_SIZE - 1) == -1)
 	{
 		perror("read(): error");
 		exit(1);
