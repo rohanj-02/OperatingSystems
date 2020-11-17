@@ -87,6 +87,7 @@ int main(void)
 			perror("wait: error");
 			exit(1);
 		}
+
 		// Close the rest of the pipes
 		close(pipe1[1]);
 		close(pipe2[0]);

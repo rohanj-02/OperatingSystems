@@ -8,19 +8,19 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-// Sender or Client
+// Receiver or Server
 #define PORT_NAME "1500" // Common port for all
 #define LOCALHOST "127.0.0.1"
 #define MAX_SIZE 501
 
-int main(int argc, char *argv[])
+int main(void)
 {
-	int sock_descriptor, fptr, return_val;
+	int sock_descriptor;
 	struct addrinfo hints, *res, *iter;
-	char file_input[MAX_SIZE];
+	int return_val;
 
 	// Setup hints to use getaddrinfo()
-	memset(&hints, 0, sizeof(hints));
+	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;	// Generic code for IPv4 adn IPv6
 	hints.ai_socktype = SOCK_DGRAM; // Datagram Sockets
 
@@ -36,7 +36,12 @@ int main(int argc, char *argv[])
 	{
 		if ((sock_descriptor = socket(iter->ai_family, iter->ai_socktype, iter->ai_protocol)) != -1)
 		{
-			break;
+			if (bind(sock_descriptor, iter->ai_addr, iter->ai_addrlen) != -1)
+			{
+				break;
+			}
+			close(sock_descriptor);
+			perror("listener: bind");
 		}
 		perror("socket(): error");
 	}
@@ -48,50 +53,29 @@ int main(int argc, char *argv[])
 	}
 
 	// Socket succesfully created
-	// Open file
-	fptr = open("./para2.txt", O_RDONLY);
-	if (fptr == -1)
-	{
-		perror("open(): error");
-		exit(1);
-	}
+	// Cleanup: Free the LL of struct addrinfo because process going in inf loop
+	freeaddrinfo(res);
 
-	// Read the file and tokenize it
-	if (read(fptr, &file_input, MAX_SIZE) == -1)
-	{
-		perror("read(): error");
-		exit(1);
-	}
+	printf("listener: waiting to recvfrom...\n");
 
-	char *tokens = strtok(file_input, " ");
-
-	// Send individual tokens to the socket
-	while (tokens != NULL)
+	while (1)
 	{
-		int bytes_sent = 0;
+		int bytes_received;
 		char str[MAX_SIZE];
-		strcpy(str, tokens);
-		int len = sizeof(tokens);
+		struct sockaddr_storage server_address;
+		socklen_t addr_len = sizeof(server_address);
 
-		if ((bytes_sent = sendto(sock_descriptor, str, len, 0, iter->ai_addr, iter->ai_addrlen)) < len)
+		if ((bytes_received = recvfrom(sock_descriptor, str, MAX_SIZE - 1, 0, (struct sockaddr *)&server_address, &addr_len)) == -1)
 		{
-			if (bytes_sent == -1)
-			{
-				perror("talker: sendto");
-				exit(1);
-			}
-			else
-			{
-				fprintf(stderr, "Did not send all the data to the socket!\n");
-			}
+			perror("recvfrom(): error");
+			exit(1);
 		}
-
-		tokens = strtok(NULL, " ");
+		str[bytes_received] = '\0';
+		printf("%s ", str);
 	}
 
-	// Cleanup and close socket
-	freeaddrinfo(res);		// free the LL of struct addrinfo
-	close(sock_descriptor); // close the socket
+	// Cleanup: Close Socket
+	close(sock_descriptor);
 
 	return 0;
 }

@@ -7,15 +7,13 @@
 #include <sys/msg.h>
 #include <unistd.h>
 #include <fcntl.h>
-// #include <stdbool.h>
 
+//Sender
 struct data
 {
 	long mtype;
 	char input[500];
 };
-
-//Sender
 
 int main(void)
 {
@@ -45,19 +43,6 @@ int main(void)
 		perror("msgget(): error");
 		exit(1);
 	}
-
-	// mtype can be any positive long value
-	// buffer.mtype = 1;
-
-	// while (fgets(buffer.input, sizeof buffer.input, stdin) != NULL)
-	// {
-	// 	int len = strlen(buffer.input);
-	// 	/* ditch newline at end, if it exists */
-	// 	if (buffer.input[len - 1] == '\n')
-	// 		buffer.input[len - 1] = '\0';
-	// 	if (msgsnd(msqid, &buffer, len + 1, 0) == -1) /* +1 for '\0' */
-	// 		perror("msgsnd");
-	// }
 
 	// Read the file and tokenize it
 	if (read(fptr, &file_input, 500) == -1)
