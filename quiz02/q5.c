@@ -14,7 +14,6 @@
 
 sem_t writing;		   //Binary semaphore for writer and reader
 pthread_mutex_t mutex; // Mutex lock for reader_count
-int count = 1;		   // Useless for us, add shared memory here
 int reader_count = 0;  // Number of readers currently reading shm
 key_t shm_key;		   // For shared memory
 int shmid;
@@ -79,9 +78,6 @@ void *writer(void *number)
 {
 	//* Signal for down (Entry Section)
 	sem_wait(&writing);
-
-	//Change count to writers some data in shared mem segment
-	count = count * 2;
 
 	//* Critical Section
 	// Attach to shm
