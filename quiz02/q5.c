@@ -19,8 +19,8 @@ key_t shm_key;		   // For shared memory
 int shmid;
 
 //TODO See how to see that only readers don't hog up and writers dont starve(Do we need to check write after write or can we do without that?)
-// If yes then find NUMBERS way to implement the producer consumer buffer thing here
-//TODO Delete shared mem in main()
+// If yes then find a way to implement the producer consumer buffer thing here
+
 void *reader(void *number)
 {
 	//* Entry Section
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 	}
 
 	// Generate key and connect to the shared memory
-	if ((shm_key = ftok("q5.c", 'NUMBERS')) == -1)
+	if ((shm_key = ftok("q5.c", 'A')) == -1)
 	{
 		perror("ftok(): error");
 		exit(1);
@@ -167,6 +167,7 @@ int main(int argc, char *argv[])
 	// reader writer count cannot be more than 10;
 	int NUMBERS[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
+	// Create threads
 	for (int i = 0; i < WRITER_COUNT; i++)
 	{
 		if (pthread_create(&writers[i], NULL, (void *)writer, (void *)&NUMBERS[i]) != 0)
@@ -185,15 +186,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	for (int i = 0; i < READER_COUNT; i++)
-	{
-		if (pthread_join(readers[i], NULL) != 0)
-		{
-			perror("pthread_join(): error");
-			// Don't exit, Let the other threads join
-		}
-	}
-
+	// Join threads
 	for (int i = 0; i < WRITER_COUNT; i++)
 	{
 		if (pthread_join(writers[i], NULL) != 0)
@@ -203,7 +196,21 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// Cleanup: Destroy mutex and semaphores
+	for (int i = 0; i < READER_COUNT; i++)
+	{
+		if (pthread_join(readers[i], NULL) != 0)
+		{
+			perror("pthread_join(): error");
+			// Don't exit, Let the other threads join
+		}
+	}
+
+	// Cleanup: Destroy shared memory, mutex and semaphores
+	if (shmctl(shmid, IPC_RMID, NULL) == -1)
+	{
+		perror("shmctl(): error");
+		exit(1);
+	}
 	if (pthread_mutex_destroy(&mutex) != 0)
 	{
 		perror("pthread_mutex_destroy(): error");

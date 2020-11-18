@@ -6,66 +6,88 @@
 #include <string.h>
 
 #define PHIL_COUNT 5
+#define EAT_COUNT 1
 
-sem_t forks[PHIL_COUNT]; //Binary semaphore for phil_run and reader
-// pthread_mutex_t mutex;	 // Mutex lock for reader_count
+sem_t forks[PHIL_COUNT]; //Binary semaphore array for phil_run
 
 void *phil_run(void *number)
 {
-	//* Entry Section
-	// Grab the forks!
 	int current_phil = *((int *)number);
-	// Changing the order of getting the forks/ chopsticks of one philosopher prevents deadlock
+	int right_fork = (current_phil == PHIL_COUNT) ? 0 : current_phil;
+	int curr_eat_count = 0;
 
-	int x = (current_phil == PHIL_COUNT) ? 0 : current_phil;
-	if (current_phil == 1)
+	// Loop till philosopher hasn't eaten enough times
+	do
 	{
-		if (sem_wait(&forks[x]) == -1)
+		//* Entry Section
+		// Changing the order of getting the forks/ chopsticks of half the philosophers prevents deadlock
+		if (current_phil % 2 != 0)
 		{
-			perror("sem_wait(): error");
-			exit(1);
-		}
-		if (sem_wait(&forks[current_phil - 1]) == -1)
-		{
-			perror("sem_wait(): error");
-			exit(1);
-		}
-	}
-	else
-	{
-		if (sem_wait(&forks[current_phil - 1]) == -1)
-		{
-			perror("sem_wait(): error");
-			exit(1);
-		}
-		if (sem_wait(&forks[x]) == -1)
-		{
-			perror("sem_wait(): error");
-			exit(1);
-		}
-	}
+			// Odd philosophers grab the right fork first and then the left one.
+			if (sem_wait(&forks[right_fork]) == -1)
+			{
+				perror("sem_wait(): error");
+				exit(1);
+			}
 
-	//* Critical Section
-	fprintf(stderr, "Philosopher %d picked up forks %d and %d\n", current_phil, current_phil, x + 1);
+			printf("Philosopher %d picked up fork %d\n", current_phil, right_fork + 1);
 
-	//* Exit Section
-	if (sem_post(&forks[current_phil - 1]) == -1)
-	{
-		perror("sem_post(): error");
-		exit(1);
-	}
-	if (sem_post(&forks[x]) == -1)
-	{
-		perror("sem_post(): error");
-		exit(1);
-	}
+			if (sem_wait(&forks[current_phil - 1]) == -1)
+			{
+				perror("sem_wait(): error");
+				exit(1);
+			}
+
+			printf("Philosopher %d picked up fork %d\n", current_phil, current_phil);
+		}
+		else
+		{
+			// Even philosophers grab the left fork first and then the right one.
+			if (sem_wait(&forks[current_phil - 1]) == -1)
+			{
+				perror("sem_wait(): error");
+				exit(1);
+			}
+
+			printf("Philosopher %d picked up fork %d\n", current_phil, current_phil);
+
+			if (sem_wait(&forks[right_fork]) == -1)
+			{
+				perror("sem_wait(): error");
+				exit(1);
+			}
+			printf("Philosopher %d picked up fork %d\n", current_phil, right_fork + 1);
+		}
+
+		//* Critical Section
+		printf("Philosopher %d is eating!\n", current_phil);
+
+		//* Exit Section
+		// Signal that the forks are now available to use!
+		if (sem_post(&forks[current_phil - 1]) == -1)
+		{
+			perror("sem_post(): error");
+			exit(1);
+		}
+		if (sem_post(&forks[right_fork]) == -1)
+		{
+			perror("sem_post(): error");
+			exit(1);
+		}
+
+		//Increase the number of times the philosopher has eaten
+		curr_eat_count++;
+
+	} while (curr_eat_count != EAT_COUNT);
+
+	printf("Philosopher %d is done!\n", current_phil);
 }
 
 int main(int argc, char *argv[])
 {
 	pthread_t philosophers[PHIL_COUNT];
 
-	// Initialise mutex and semaphores
+	// Initialise semaphores
 	for (int i = 0; i < PHIL_COUNT; i++)
 	{
 		if (sem_init(&forks[i], 0, 1) == -1)
@@ -75,8 +97,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	// philosopher count cannot be more than 10;
 	int NUMBERS[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
+	// Create threads and then join them
 	for (int i = 0; i < PHIL_COUNT; i++)
 	{
 		if (pthread_create(&philosophers[i], NULL, (void *)phil_run, (void *)&NUMBERS[i]) != 0)
@@ -95,6 +119,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	// Cleanup: Destroy semaphores
 	for (int i = 0; i < PHIL_COUNT; i++)
 	{
 		if (sem_destroy(&forks[i]) == -1)

@@ -10,11 +10,11 @@
 
 #define MAX_SIZE 501
 
-//TODO System V or IPC?
+//TODO System V or POSIX?
 //TODO Race condition?
 //TODO One weird symbol between the two processes
 //TODO CHeck all error handling
-
+//TODO add who is sending data para1 or para2 in both q2 and q3
 //Sender
 struct data
 {
