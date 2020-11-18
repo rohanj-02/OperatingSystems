@@ -1,3 +1,6 @@
+/*	Name: Rohan Jain
+	Roll No.: 2019095 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -6,10 +9,11 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 
 // Sender or Client
-#define PORT_NAME "1500" // Common port for all
+#define PORT_NAME 1500 // Common port for all
 #define LOCALHOST "127.0.0.1"
 #define MAX_SIZE 501
 #define FILENAME "./para2.txt"
@@ -23,34 +27,17 @@ struct data
 int main(void)
 {
 	char file_input[MAX_SIZE];
-	int sock_descriptor, fptr, return_val, read_bytes;
-	struct addrinfo hints, *res, *iter;
+	int sock_descriptor, fptr, read_bytes;
+	struct sockaddr_in server;
+	struct in_addr localhost;
 
-	// Setup hints to use getaddrinfo() to connect to the receiver
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_family = AF_UNSPEC;
+	memset(&server, 0, sizeof(server));
+	memset(&file_input, '\0', MAX_SIZE);
+	memset(&localhost, 0, sizeof(localhost));
 
-	// Get LL of struct addrinfo() corresponding to LOCALHOST PORT_NAME and hints.
-	if ((return_val = getaddrinfo(LOCALHOST, PORT_NAME, &hints, &res)) != 0)
+	if ((sock_descriptor = socket(AF_INET, SOCK_DGRAM, 0)) < 0) //IPv4 only
 	{
-		fprintf(stderr, "getaddrinfo(): error: %s\n", gai_strerror(return_val));
-		exit(1);
-	}
-
-	// Loop through all entries and try to make a socket
-	for (iter = res; iter != NULL; iter = iter->ai_next)
-	{
-		if ((sock_descriptor = socket(iter->ai_family, iter->ai_socktype, iter->ai_protocol)) != -1)
-		{
-			break;
-		}
 		perror("socket(): error");
-	}
-
-	if (iter == NULL)
-	{
-		fprintf(stderr, "Socket not created\n");
 		exit(1);
 	}
 
@@ -73,6 +60,15 @@ int main(void)
 	file_input[read_bytes] = '\0';
 	char *tokens = strtok(file_input, " ");
 
+	if (inet_pton(AF_INET, LOCALHOST, &localhost) != 1)
+	{
+		perror("inet_pton(): error");
+		exit(1);
+	}
+	server.sin_addr = localhost;
+	server.sin_port = htons(PORT_NAME);
+	server.sin_family = AF_INET;
+
 	// Send individual tokens to the socket
 	while (tokens != NULL)
 	{
@@ -83,7 +79,7 @@ int main(void)
 		strcpy(buffer.str, tokens);
 		int len = strlen(tokens);
 
-		if ((bytes_sent = sendto(sock_descriptor, &buffer, sizeof(buffer), 0, iter->ai_addr, iter->ai_addrlen)) < len)
+		if ((bytes_sent = sendto(sock_descriptor, &buffer, sizeof(buffer), 0, (const struct sockaddr *)&server, sizeof(server))) < len)
 		{
 			if (bytes_sent == -1)
 			{
@@ -100,7 +96,6 @@ int main(void)
 	}
 
 	// Cleanup
-	freeaddrinfo(res);		// free the LL of struct addrinfo
 	close(sock_descriptor); // close the socket
 
 	return 0;
