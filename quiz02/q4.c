@@ -45,8 +45,8 @@ int main(void)
 		exit(1);
 	}
 
-	// Set value of all semaphores to 1
-	ushort init_val[] = {1, 1, 1};
+	// Set value of mutex to 1 and read locks to 0 as they will be locked till the writer writes to the shared memory
+	ushort init_val[] = {1, 0, 0};
 	union semun arg;
 	arg.array = init_val;
 	if (semctl(semid, 0, SETALL, arg.array) == -1)
@@ -54,6 +54,9 @@ int main(void)
 		perror("semctl(): error");
 		exit(1);
 	}
+
+	//* Fork process and let child and parent perform operations.
+	pid = fork();
 
 	// Get shm and attach to it. Do it in main to avoid repeating code. Can be just copy pasted to child and parent and will work without problems.
 	key_t shm_text_key, shm_num_key;
@@ -87,9 +90,6 @@ int main(void)
 		exit(1);
 	}
 
-	//* Fork process and let child and parent perform operations.
-	pid = fork();
-
 	if (pid == -1)
 	{
 		perror("fork(): error");
@@ -102,6 +102,63 @@ int main(void)
 
 		struct sembuf child_num;
 		char str[SHM_SIZE];
+
+		// Read the text segment written by parent!
+		//* Entry Section (Allocate both resources)
+		// Requires read lock first and then mutex lock
+		child_num.sem_op = -1;
+		child_num.sem_num = TEXT_SEG_LOCK;
+		if (semop(semid, &child_num, 1) == -1)
+		{
+			perror("semop(): error");
+			exit(1);
+		}
+
+		child_num.sem_op = -1;
+		child_num.sem_num = MUTEX;
+		if (semop(semid, &child_num, 1) == -1)
+		{
+			perror("semop(): error");
+			exit(1);
+		}
+
+		//* Critical Section
+		// Get pointer to shm at 0th position i.e. Attach to shm_text
+		if ((shmptr_text = shmat(shmid_text, (void *)0, 0)) == (char *)(-1))
+		{
+			perror("shmat(): error");
+			exit(1);
+		}
+
+		// Read data
+		memset(str, '\0', SHM_SIZE);
+		strncpy(str, shmptr_text, SHM_SIZE);
+		printf("Child read %s from text segment\n", str);
+
+		// Detach shm
+		if (shmdt(shmptr_text) == -1)
+		{
+			perror("shmdt(): error");
+			exit(1);
+		}
+
+		//* Exit Section (Deallocate both resources)
+		child_num.sem_op = 1;
+		child_num.sem_num = TEXT_SEG_LOCK;
+		if (semop(semid, &child_num, 1) == -1)
+		{
+			perror("semop(): error");
+			exit(1);
+		}
+
+		// Free mutex and then the text segment lock
+		child_num.sem_op = 1;
+		child_num.sem_num = MUTEX;
+		if (semop(semid, &child_num, 1) == -1)
+		{
+			perror("semop(): error");
+			exit(1);
+		}
 
 		//* Write to num
 		child_num.sem_num = MUTEX;
@@ -129,7 +186,7 @@ int main(void)
 		printf("Child wrote %s to num segment\n", str);
 		strncpy(shmptr_num, str, SHM_SIZE);
 
-		//Detach shm
+		// Detach shm
 		if (shmdt(shmptr_num) == -1)
 		{
 			perror("shmdt(): error");
@@ -148,64 +205,6 @@ int main(void)
 		}
 
 		// Free mutex lock so parent can also write to either text or num segment
-		child_num.sem_op = 1;
-		child_num.sem_num = MUTEX;
-		if (semop(semid, &child_num, 1) == -1)
-		{
-			perror("semop(): error");
-			exit(1);
-		}
-		// Write to num over! Now go to read text
-
-		//* Entry Section (Allocate both resources)
-		// Requires read lock first and then mutex lock
-		child_num.sem_op = -1;
-		child_num.sem_num = TEXT_SEG_LOCK;
-		if (semop(semid, &child_num, 1) == -1)
-		{
-			perror("semop(): error");
-			exit(1);
-		}
-
-		//? Do we eve need mutex for reading??
-		child_num.sem_op = -1;
-		child_num.sem_num = MUTEX;
-		if (semop(semid, &child_num, 1) == -1)
-		{
-			perror("semop(): error");
-			exit(1);
-		}
-
-		//* Critical Section
-		// Get pointer to shm at 0th position i.e. Attach to shm_text
-		if ((shmptr_text = shmat(shmid_text, (void *)0, 0)) == (char *)(-1))
-		{
-			perror("shmat(): error");
-			exit(1);
-		}
-
-		// Read data
-		memset(str, '\0', SHM_SIZE);
-		strncpy(str, shmptr_text, SHM_SIZE);
-		printf("Child read %s from text segment\n", str);
-
-		//Detach shm
-		if (shmdt(shmptr_text) == -1)
-		{
-			perror("shmdt(): error");
-			exit(1);
-		}
-
-		//*Exit Section (Deallocate both resources)
-		child_num.sem_op = 1;
-		child_num.sem_num = TEXT_SEG_LOCK;
-		if (semop(semid, &child_num, 1) == -1)
-		{
-			perror("semop(): error");
-			exit(1);
-		}
-
-		// Free mutex and then the text segment lock
 		child_num.sem_op = 1;
 		child_num.sem_num = MUTEX;
 		if (semop(semid, &child_num, 1) == -1)
@@ -249,16 +248,16 @@ int main(void)
 		printf("Parent wrote %s to text segment\n", str);
 		strncpy(shmptr_text, str, SHM_SIZE);
 
-		//Detach shm
+		// Detach shm
 		if (shmdt(shmptr_text) == -1)
 		{
 			perror("shmdt(): error");
 			exit(1);
 		}
 
-		//*Exit Section (Deallocate both resources)
+		//* Exit Section (Deallocate both resources)
 		parent_num.sem_op = 1;
-		parent_num.sem_num = NUM_SEG_LOCK;
+		parent_num.sem_num = TEXT_SEG_LOCK;
 		if (semop(semid, &parent_num, 1) == -1)
 		{
 			perror("semop(): error");
@@ -276,7 +275,7 @@ int main(void)
 		// Write to text over! Now go to read num
 
 		// First get read lock for text segment then get mutex
-		parent_num.sem_num = TEXT_SEG_LOCK;
+		parent_num.sem_num = NUM_SEG_LOCK;
 		parent_num.sem_op = -1;
 
 		//* Entry Section (Allocate both resources)
@@ -308,7 +307,7 @@ int main(void)
 		strncpy(str, shmptr_num, SHM_SIZE);
 		printf("Parent read %s from num segment\n", str);
 
-		//Detach shm
+		// Detach shm
 		if (shmdt(shmptr_num) == -1)
 		{
 			perror("shmdt(): error");
@@ -325,7 +324,7 @@ int main(void)
 		}
 
 		parent_num.sem_op = 1;
-		parent_num.sem_num = TEXT_SEG_LOCK;
+		parent_num.sem_num = NUM_SEG_LOCK;
 		if (semop(semid, &parent_num, 1) == -1)
 		{
 			perror("semop(): error");
