@@ -9,8 +9,10 @@
 #include <fcntl.h>
 
 #define MAX_SIZE 501
+#define MQ_PERMS 0666
+#define FILENAME "./para2.txt"
 
-//Sender
+//Sender 2
 struct data
 {
 	long mtype;
@@ -19,13 +21,11 @@ struct data
 
 int main(void)
 {
-	// struct data buffer;
 	key_t key;
-	int msqid;
-	int fptr;
+	int msqid, read_bytes;
 	char file_input[MAX_SIZE];
 
-	fptr = open("./para2.txt", O_RDONLY);
+	int fptr = open(FILENAME, O_RDONLY);
 	if (fptr == -1)
 	{
 		perror("open(): error");
@@ -40,26 +40,26 @@ int main(void)
 	}
 
 	// Get the message queue
-	if ((msqid = msgget(key, 0644 | IPC_CREAT)) == -1)
+	if ((msqid = msgget(key, MQ_PERMS | IPC_CREAT)) == -1)
 	{
 		perror("msgget(): error");
 		exit(1);
 	}
 
 	// Read the file and tokenize it
-	if (read(fptr, &file_input, MAX_SIZE - 1) == -1)
+	if ((read_bytes = read(fptr, &file_input, MAX_SIZE - 1)) == -1)
 	{
 		perror("read(): error");
 		exit(1);
 	}
-
-	char *tokens = strtok(file_input, " ");
+	file_input[read_bytes] = '\0'; // read() does not add null terminator at end
+	char *tokens = strtok(file_input, " \n");
 
 	// Send individual tokens on the message queue
 	while (tokens != NULL)
 	{
 		struct data buffer;
-		buffer.mtype = 1;
+		buffer.mtype = 2; // mtype 2 because sending from para 2
 		strcpy(buffer.input, tokens);
 		int len = sizeof(tokens);
 
@@ -71,11 +71,6 @@ int main(void)
 		tokens = strtok(NULL, " ");
 	}
 
-	// Close the message queue
-	// if (msgctl(msqid, IPC_RMID, NULL) == -1)
-	// {
-	// 	perror("msgctl");
-	// 	exit(1);
-	// }
+	// Leave closing of queue to the receiver
 	return 0;
 }

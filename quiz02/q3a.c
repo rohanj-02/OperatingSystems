@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
 
 	// Setup hints to use getaddrinfo()
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;	// Generic code for IPv4 and IPv6
-	hints.ai_socktype = SOCK_DGRAM; // Datagram Sockets
+	hints.ai_family = AF_UNSPEC; // Generic code for IPv4 and IPv6
+	hints.ai_socktype = SOCK_DGRAM;
 
 	// Get LL of struct addrinfo() corresponding to LOCALHOST PORT_NAME and hints.
 	if ((return_val = getaddrinfo(LOCALHOST, PORT_NAME, &hints, &res)) != 0)

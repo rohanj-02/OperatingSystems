@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <string.h>
+
 #define MAX_SIZE 501
 
 int isEscape(char *in, int index)
@@ -39,8 +40,8 @@ int isEscape(char *in, int index)
 
 int main(void)
 {
-	int pipe1[2]; //Sends data from parent to child
-	int pipe2[2]; //Sends data from child to parent
+	int pipe1[2]; // Sends data from parent to child
+	int pipe2[2]; // Sends data from child to parent
 	pid_t pid;
 
 	// Setup pipe
@@ -64,7 +65,7 @@ int main(void)
 
 		char input[MAX_SIZE];
 
-		//Read from pipe
+		// Read from pipe
 		if (read(pipe1[0], &input, MAX_SIZE - 1) == -1)
 		{
 			perror("read(): error");
@@ -84,7 +85,7 @@ int main(void)
 			}
 		}
 
-		//Write upper case to pipe from child to parent
+		// Write upper case to pipe from child to parent
 		if (write(pipe2[1], &input, i) == -1)
 		{
 			perror("write(): error");
