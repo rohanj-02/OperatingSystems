@@ -4,92 +4,77 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <netdb.h>
 #include <unistd.h>
-#include <stdbool.h>
+#include <fcntl.h>
 
-#define SOCK_PATH "socket_q3"
+// Receiver or Server
+#define PORT_NAME "1500" // Common port for all
+#define LOCALHOST "127.0.0.1"
 #define MAX_SIZE 501
 
 int main(void)
 {
-	int sock_descriptor, sock_client_desc, len;
-	struct sockaddr_in local, remote;
+	int sock_descriptor, return_val;
+	struct addrinfo hints, *res, *iter;
 
-	// Get socket descriptor
-	if ((sock_descriptor = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
+	// Setup hints to use getaddrinfo()
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;	// Generic code for IPv4 and IPv6
+	hints.ai_socktype = SOCK_DGRAM; // Datagram Sockets
+
+	// Get LL of struct addrinfo() corresponding to LOCALHOST PORT_NAME and hints.
+	if ((return_val = getaddrinfo(LOCALHOST, PORT_NAME, &hints, &res)) != 0)
 	{
+		fprintf(stderr, "getaddrinfo(): error: %s\n", gai_strerror(return_val));
+		exit(1);
+	}
+
+	// Dont assume first entry in LL is correct, loop through all and try to make a socket
+	for (iter = res; iter != NULL; iter = iter->ai_next)
+	{
+		if ((sock_descriptor = socket(iter->ai_family, iter->ai_socktype, iter->ai_protocol)) != -1)
+		{
+			if (bind(sock_descriptor, iter->ai_addr, iter->ai_addrlen) != -1)
+			{
+				break;
+			}
+			close(sock_descriptor);
+			perror("listener: bind");
+		}
 		perror("socket(): error");
-		exit(1);
 	}
 
-	// Standard
-	local.sun_family = AF_UNIX;
-	strcpy(local.sun_path, SOCK_PATH);
-	// Delete the socket file if it exists
-	unlink(local.sun_path);
-	len = strlen(local.sun_path) + sizeof(local.sun_family);
-
-	// Bind the socket descriptor to SOCK_PATH
-	if (bind(sock_descriptor, (struct sockaddr *)&local, len) == -1)
+	if (iter == NULL)
 	{
-		perror("bind(): error");
+		fprintf(stderr, "Socket not created\n");
 		exit(1);
 	}
 
-	// Listen to connections, if more than 2 try to connect they receive ECONNREFUSED
-	if (listen(sock_descriptor, 5) == -1)
-	{
-		perror("listen(): error");
-		exit(1);
-	}
+	// Socket succesfully created
+	// Cleanup: Free the LL of struct addrinfo because process going in inf loop
+	freeaddrinfo(res);
 
-	while (true)
+	printf("listener: waiting to recvfrom...\n");
+
+	while (1)
 	{
 		int bytes_received;
-		bool done = false;
 		char str[MAX_SIZE];
-		int temp_size = sizeof(remote);
+		struct sockaddr_storage server_address;
+		socklen_t addr_len = sizeof(server_address);
 
-		printf("Waiting for a connection...\n");
-
-		// Get socket descriptor connected to client
-		if ((sock_client_desc = accept(sock_descriptor, (struct sockaddr *)&remote, &temp_size)) == -1)
+		if ((bytes_received = recvfrom(sock_descriptor, str, MAX_SIZE - 1, 0, (struct sockaddr *)&server_address, &addr_len)) == -1)
 		{
-			perror("accept(): error");
+			perror("recvfrom(): error");
 			exit(1);
 		}
-		printf("Connected.\n");
-
-		done = false;
-
-		do
-		{
-			// Receive data from client
-			bytes_received = recv(sock_client_desc, str, MAX_SIZE, 0);
-			if (bytes_received <= 0)
-			{
-				if (bytes_received < 0)
-				{
-					perror("recv(): error");
-				}
-				//Error so no response as no read
-				done = true;
-			}
-
-			// Send ok response on receiving data
-			if (!done)
-			{
-				char response[10] = "200";
-				if (send(sock_client_desc, response, sizeof(response), 0) < 0)
-				{
-					perror("send(): error");
-					done = true;
-				}
-			}
-		} while (!done);
-
-		close(sock_client_desc);
+		str[bytes_received] = '\0';
+		printf("%s ", str);
 	}
+
+	// Cleanup: Close Socket
+	close(sock_descriptor);
+
 	return 0;
 }

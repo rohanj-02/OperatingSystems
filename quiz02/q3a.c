@@ -4,51 +4,57 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
+#include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
 
-#define SOCK_PATH "socket_q3"
+// Sender or Client
+#define PORT_NAME "1500" // Common port for all
+#define LOCALHOST "127.0.0.1"
 #define MAX_SIZE 501
 
-// Client as it sends data to server
-
-int main(void)
+int main(int argc, char *argv[])
 {
-	int sock_descriptor, bytes_received, len, fptr;
-	struct sockaddr_in remote;
-	char word[MAX_SIZE];
+	int sock_descriptor, fptr, return_val;
+	struct addrinfo hints, *res, *iter;
 	char file_input[MAX_SIZE];
 
-	// Open the file para1.txt
-	if (fptr = open("./para1.txt", O_RDONLY) == -1)
+	// Setup hints to use getaddrinfo()
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;	// Generic code for IPv4 adn IPv6
+	hints.ai_socktype = SOCK_DGRAM; // Datagram Sockets
+
+	// Get LL of struct addrinfo() corresponding to LOCALHOST PORT_NAME and hints.
+	if ((return_val = getaddrinfo(LOCALHOST, PORT_NAME, &hints, &res)) != 0)
+	{
+		fprintf(stderr, "getaddrinfo(): error: %s\n", gai_strerror(return_val));
+		exit(1);
+	}
+
+	// Dont assume first entry in LL is correct, loop through all and try to make a socket
+	for (iter = res; iter != NULL; iter = iter->ai_next)
+	{
+		if ((sock_descriptor = socket(iter->ai_family, iter->ai_socktype, iter->ai_protocol)) != -1)
+		{
+			break;
+		}
+		perror("socket(): error");
+	}
+
+	if (iter == NULL)
+	{
+		fprintf(stderr, "Socket not created\n");
+		exit(1);
+	}
+
+	// Socket succesfully created
+	// Open file
+	fptr = open("./para1.txt", O_RDONLY);
+	if (fptr == -1)
 	{
 		perror("open(): error");
 		exit(1);
 	}
-
-	// Connect to a Datagram Socket, AF_UNIX for local storage?
-	if ((sock_descriptor = socket(AF_UNIX, SOCK_DGRAM, 0)) == -1)
-	{
-		perror("socket(): error");
-		exit(1);
-	}
-
-	printf("Trying to connect...\n");
-
-	// Understand these lines/
-	remote.sin_family = AF_UNIX;		// The AF_UNIX socket family is used to communicate between processes on the same machine.
-	strcpy(remote.sun_path, SOCK_PATH); // Connect to the socket present at SOCK_PATH
-	len = strlen(remote.sun_path) + sizeof(remote.sin_family);
-
-	// Connect the sockets to the socket_descriptor to the remote
-	if (connect(sock_descriptor, (struct sockaddr *)&remote, len) == -1)
-	{
-		perror("connect(): error");
-		exit(1);
-	}
-
-	printf("Connected.\n");
 
 	// Read the file and tokenize it
 	if (read(fptr, &file_input, MAX_SIZE) == -1)
@@ -59,39 +65,33 @@ int main(void)
 
 	char *tokens = strtok(file_input, " ");
 
-	// Send individual tokens on the message queue
+	// Send individual tokens to the socket
 	while (tokens != NULL)
 	{
+		int bytes_sent = 0;
 		char str[MAX_SIZE];
 		strcpy(str, tokens);
-		len = sizeof(tokens);
+		int len = sizeof(tokens);
 
-		// Send the data through socket to server
-		if (send(sock_descriptor, str, len, 0) == -1)
+		if ((bytes_sent = sendto(sock_descriptor, str, len, 0, iter->ai_addr, iter->ai_addrlen)) < len)
 		{
-			perror("send");
-			exit(1);
-		}
-		if ((bytes_received = recv(sock_descriptor, str, MAX_SIZE, 0)) > 0)
-		{
-			// Everything fine, the server received the message
-			printf("Received properly!");
-		}
-		else
-		{
-			if (bytes_received < 0)
+			if (bytes_sent == -1)
 			{
-				perror("recv(): error");
+				perror("talker: sendto");
+				exit(1);
 			}
 			else
 			{
-				printf("Server closed connection\n");
+				fprintf(stderr, "Did not send all the data to the socket!\n");
 			}
-			exit(1);
 		}
+
 		tokens = strtok(NULL, " ");
 	}
 
-	close(sock_descriptor);
+	// Cleanup and close socket
+	freeaddrinfo(res);		// free the LL of struct addrinfo
+	close(sock_descriptor); // close the socket
+
 	return 0;
 }
