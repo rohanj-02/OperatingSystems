@@ -136,7 +136,7 @@ void *writer(void *number)
 	}
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	pthread_t readers[READER_COUNT], writers[WRITER_COUNT];
 

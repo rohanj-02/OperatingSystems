@@ -83,7 +83,7 @@ void *phil_run(void *number)
 	printf("Philosopher %d is done!\n", current_phil);
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	pthread_t philosophers[PHIL_COUNT];
 

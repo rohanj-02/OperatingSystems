@@ -12,9 +12,6 @@
 #define MQ_PERMS 0666
 #define FILENAME "./para1.txt"
 
-//TODO Race condition?
-//TODO One weird symbol between the two processes
-//TODO add who is sending data para1 or para2 in both q2 and q3
 //Sender
 struct data
 {
@@ -56,53 +53,15 @@ int main(void)
 		exit(1);
 	}
 	file_input[read_bytes] = '\0'; // read() does not add null terminator at end
-
-	// int iter = 0;
-	// struct data buffer;
-	// buffer.mtype = 1; // mtype 1 because sending from para 1
-	// memset(buffer.input, '\0', MAX_SIZE);
-	// while (file_input[iter] != '\0')
-	// {
-	// 	char temp[2];
-	// 	if (file_input[iter] != ' ')
-	// 	{
-	// 		temp[0] = file_input[iter];
-	// 		temp[1] = '\0';
-	// 		strcat(buffer.input, temp);
-	// 	}
-	// 	else
-	// 	{
-	// 		// strcat(buffer.input, '\0');
-	// 		int len = strlen(buffer.input);
-	// 		printf("Sent %s size %ld\n", buffer.input, strlen(buffer.input));
-	// 		if (msgsnd(msqid, &buffer, len, 0) == -1)
-	// 		{
-	// 			perror("msgsnd(): error");
-	// 			// Do not return, atleast send the other tokens
-	// 		}
-	// 		memset(buffer.input, '\0', MAX_SIZE);
-	// 	}
-	// 	iter++;
-	// }
-
-	// int len = strlen(buffer.input);
-	// printf("Sent %s", buffer.input);
-	// if (msgsnd(msqid, &buffer, len, 0) == -1)
-	// {
-	// 	perror("msgsnd(): error");
-	// 	// Do not return, atleast send the other tokens
-	// }
-
 	char *tokens = strtok(file_input, " \n");
 
-	// // Send individual tokens on the message queue
+	// Send individual tokens on the message queue
 	while (tokens != NULL)
 	{
 		struct data buffer;
 		buffer.mtype = 1; // mtype 1 because sending from para 1
 		strcpy(buffer.input, tokens);
-		int len = sizeof(tokens);
-		// int len = strlen(buffer.input);
+		int len = strlen(tokens);
 
 		if (msgsnd(msqid, &buffer, len, 0) == -1)
 		{

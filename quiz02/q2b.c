@@ -61,7 +61,7 @@ int main(void)
 		struct data buffer;
 		buffer.mtype = 2; // mtype 2 because sending from para 2
 		strcpy(buffer.input, tokens);
-		int len = sizeof(tokens);
+		int len = strlen(tokens);
 
 		if (msgsnd(msqid, &buffer, len, 0) == -1)
 		{

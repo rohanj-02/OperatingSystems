@@ -10,6 +10,7 @@
 
 #define MAX_SIZE 501
 #define MQ_PERMS 0666
+
 //Receiver
 struct data
 {
@@ -19,7 +20,6 @@ struct data
 
 int main(void)
 {
-	// struct data buffer;
 	key_t key;
 	int msqid, flag = 1;
 
@@ -37,7 +37,7 @@ int main(void)
 		exit(1);
 	}
 
-	// Receive messages till \n\n\ is not received
+	// Receive messages till \n\n is not received
 	while (flag)
 	{
 		struct data buffer;
