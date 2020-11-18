@@ -20,7 +20,7 @@ int shmid;
 
 //TODO See how to see that only readers don't hog up and writers dont starve(Do we need to check write after write or can we do without that?)
 // If yes then find NUMBERS way to implement the producer consumer buffer thing here
-
+//TODO Delete shared mem in main()
 void *reader(void *number)
 {
 	//* Entry Section
@@ -32,7 +32,7 @@ void *reader(void *number)
 	}
 	reader_count++;
 
-	// If this is the first reader send NUMBERS signal down to semaphore so that writer doesn't write to shm
+	// If this is the first reader send a signal down to semaphore so that writer doesn't write to shm
 	if (reader_count == 1)
 	{
 		if (sem_wait(&writing) == -1)
@@ -79,7 +79,7 @@ void *reader(void *number)
 	}
 	reader_count--;
 
-	// If this is the last reader then send NUMBERS signal up to semaphore so that writer can write to shm
+	// If this is the last reader then send a signal up to semaphore so that writer can write to shm
 	if (reader_count == 0)
 	{
 		if (sem_post(&writing) == -1)
@@ -120,6 +120,7 @@ void *writer(void *number)
 	sprintf(str, "writer%d", (*((int *)number)));
 	printf("Writer wrote %s\n", str);
 	strncpy(shm_ptr, str, SHM_SIZE);
+
 	// Detach from shm
 	if (shmdt(shm_ptr) == -1)
 	{
@@ -163,6 +164,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	// reader writer count cannot be more than 10;
 	int NUMBERS[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 	for (int i = 0; i < WRITER_COUNT; i++)
@@ -173,6 +175,7 @@ int main(int argc, char *argv[])
 			// Don't exit, let other threads run.
 		}
 	}
+
 	for (int i = 0; i < READER_COUNT; i++)
 	{
 		if (pthread_create(&readers[i], NULL, (void *)reader, (void *)&NUMBERS[i]) != 0)
@@ -190,6 +193,7 @@ int main(int argc, char *argv[])
 			// Don't exit, Let the other threads join
 		}
 	}
+
 	for (int i = 0; i < WRITER_COUNT; i++)
 	{
 		if (pthread_join(writers[i], NULL) != 0)
