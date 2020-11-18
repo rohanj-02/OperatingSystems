@@ -15,5 +15,5 @@ Final Table after allocation of all resources:
 |	|					|					|	12	12	8	10	|					|	
 |_______|_______________________________________|_______________________________________|_______________________________________|_______________________________________|
 						
-						
+
 Note that there are many safe sequences. They are of the type: P0 -> P3 -> (P1, P2, P4) in any order.

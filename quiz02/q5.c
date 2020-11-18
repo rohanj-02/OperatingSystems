@@ -203,6 +203,24 @@ int main(void)
 		perror("shmget(): error");
 		exit(1);
 	}
+	// Attach to shm
+	char *shm_ptr = shmat(shmid, (void *)0, 0);
+	if (shm_ptr == (char *)(-1))
+	{
+		perror("shmat(): error");
+		exit(1);
+	}
+
+	// Write data
+	char str[SHM_SIZE] = "1";
+	strncpy(shm_ptr, str, SHM_SIZE);
+
+	// Detach from shm
+	if (shmdt(shm_ptr) == -1)
+	{
+		perror("shmdt(): error");
+		exit(1);
+	}
 
 	// Create threads
 	for (int i = 0; i < WRITER_COUNT; i++)
