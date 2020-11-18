@@ -26,7 +26,7 @@ int main(void)
 	int sock_descriptor, fptr, return_val, read_bytes;
 	struct addrinfo hints, *res, *iter;
 
-	// Setup hints to use getaddrinfo()
+	// Setup hints to use getaddrinfo() to connect to the receiver
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_family = AF_UNSPEC;

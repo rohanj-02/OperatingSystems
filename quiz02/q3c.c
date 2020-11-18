@@ -19,15 +19,6 @@ struct data
 	char str[MAX_SIZE];
 };
 
-unsigned int get_port(struct sockaddr *server)
-{
-	if (server->sa_family == AF_INET6)
-	{
-		return ((struct sockaddr_in6 *)server)->sin6_port;
-	}
-	return ((struct sockaddr_in *)server)->sin_port;
-}
-
 int main(void)
 {
 	int sock_descriptor, return_val, flag = 1;
@@ -78,10 +69,10 @@ int main(void)
 		memset(buffer.str, '\0', MAX_SIZE);
 
 		// No use of this because we don't have to send response
-		struct sockaddr_storage server_address;
-		socklen_t len_server = sizeof(server_address);
+		struct sockaddr_storage client_address;
+		socklen_t len_client = sizeof(client_address);
 
-		if ((bytes_received = recvfrom(sock_descriptor, &buffer, sizeof(buffer), 0, (struct sockaddr *)&server_address, &len_server)) == -1)
+		if ((bytes_received = recvfrom(sock_descriptor, &buffer, sizeof(buffer), 0, (struct sockaddr *)&client_address, &len_client)) == -1)
 		{
 			perror("recvfrom(): error");
 			exit(1);
