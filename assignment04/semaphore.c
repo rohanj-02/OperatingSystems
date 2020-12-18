@@ -11,6 +11,7 @@
 
 typedef struct my_semaphore sem_b;
 
+//TODO Add non blocking functions, try_lock instead of lock
 // Semaphore functions
 struct my_semaphore
 {
