@@ -56,7 +56,7 @@ int main(void)
 		exit(1);
 	}
 	file_input[read_bytes] = '\0'; // read() does not add null terminator at end
-	char *tokens = strtok(file_input, " \n");
+	char *tokens = strtok(file_input, " ");
 
 	// Send individual tokens on the message queue
 	while (tokens != NULL)
