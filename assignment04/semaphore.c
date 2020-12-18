@@ -9,12 +9,10 @@
 #define EAT_COUNT 10
 #define BOWL_COUNT 2
 
-typedef struct my_blocking_semaphore sem_b;
-
-// TODO Error handling
+typedef struct my_semaphore sem_b;
 
 // Semaphore functions
-struct my_blocking_semaphore
+struct my_semaphore
 {
 	pthread_mutex_t lock;
 	pthread_cond_t wait;
@@ -22,7 +20,14 @@ struct my_blocking_semaphore
 	int num_waiters;
 };
 
-int init_sem_blocking(sem_b *my_sem, int initial_value)
+/**
+ * @brief Initialises a counting semaphore
+ * 
+ * @param my_sem The semaphore to be initialised of type my_semaphore
+ * @param initial_value The initial value of the counting semaphore
+ * @return int 0 on success and -1 on error with errno set
+ */
+int init_sem(sem_b *my_sem, int initial_value)
 {
 	my_sem->value = initial_value;
 	if (pthread_mutex_init(&(my_sem->lock), NULL) != 0)
@@ -39,6 +44,12 @@ int init_sem_blocking(sem_b *my_sem, int initial_value)
 	return 0;
 }
 
+/**
+ * @brief The function signal() or V() for the my_semaphore structure. It is a blocking function.
+ * 
+ * @param s The semaphore to signal or increment
+ * @return int 0 on success and -1 on error with errno set
+ */
 int signal_blocking(sem_b *s)
 {
 	if (pthread_mutex_lock(&(s->lock)) != 0)
@@ -65,6 +76,12 @@ int signal_blocking(sem_b *s)
 	return 0;
 }
 
+/**
+ * @brief The function wait() or P() for the my_semaphore structure. It is a blocking function.
+ * 
+ * @param s The semaphore to wait or decrement
+ * @return int 0 on success and -1 on error with errno set
+ */
 int wait_blocking(sem_b *s)
 {
 	if (pthread_mutex_lock(&(s->lock)) != 0)
@@ -101,7 +118,13 @@ int wait_blocking(sem_b *s)
 	return 0;
 }
 
-void print_value_blocking(sem_b *s)
+/**
+ * @brief Function to print the value of a semaphore of type my_semaphore.
+ * 
+ * @param s The semaphore whose value is to be printed
+ * @return int 0 on success and -1 on error with errno set
+ */
+int print_value_blocking(sem_b *s)
 {
 	if (pthread_mutex_lock(&(s->lock)) != 0)
 	{
@@ -114,6 +137,7 @@ void print_value_blocking(sem_b *s)
 		perror("pthread_mutex_unlock(): error");
 		return -1;
 	}
+	return 0;
 }
 
 // Global Variables
@@ -122,7 +146,12 @@ sem_b forks[PHIL_COUNT];	   // Binary semaphore array for phil_run
 sem_b sauce_bowls[BOWL_COUNT]; // Semaphores for sauce_bowls
 
 // Helper functions
-
+/**
+ * @brief Send wait signal to semaphore at index of the semaphore array
+ * 
+ * @param sem_arr Array of semaphores
+ * @param index Index to send wait() on
+ */
 void get_sem_at_index(sem_b *sem_arr, int index)
 {
 	if (wait_blocking(&sem_arr[index]) == -1)
@@ -132,19 +161,30 @@ void get_sem_at_index(sem_b *sem_arr, int index)
 	}
 }
 
+/**
+ * @brief Initialises a semphore array
+ * 
+ * @param sem_arr Array of semaphores
+ * @param count Size of array
+ */
 void initialise_sem_array(sem_b *sem_arr, int count)
 {
 	for (int i = 0; i < count; i++)
 	{
-		if (init_sem_blocking(&sem_arr[i], 1) == -1)
+		if (init_sem(&sem_arr[i], 1) == -1)
 		{
-			printf("init_sem_blocking(): error");
+			printf("init_sem(): error");
 			exit(1);
 		}
 	}
 }
 
-// Philosopher thread
+/**
+ * @brief The function which each philosopher runs 
+ * 
+ * @param number Philosopher index number
+ * @return void* 
+ */
 void *phil_run(void *number)
 {
 	int current_phil = *((int *)number);
@@ -154,7 +194,7 @@ void *phil_run(void *number)
 	do
 	{
 		//* Entry Section
-		// Changing the order of getting the forks/ chopsticks of half the philosophers prevents deadlock
+		// Changing the order of getting the forks/chopsticks of half the philosophers prevents cyclic deadlock on getting forks
 		if (current_phil % 2 != 0)
 		{
 			// Odd philosophers grab the right fork first and then the left one.
@@ -175,10 +215,11 @@ void *phil_run(void *number)
 		}
 
 		//* Critical Section
-		// Get both bowls to eat
+		// Get both bowls one after the other to prevent deadlock
 		for (int i = 0; i < BOWL_COUNT; i++)
 		{
 			get_sem_at_index(sauce_bowls, i);
+			// print_value_blocking(&sauce_bowls[i]);
 			printf("Philosopher %d picked up bowl %d\n", current_phil, i + 1);
 		}
 
@@ -195,6 +236,7 @@ void *phil_run(void *number)
 				exit(1);
 			}
 		}
+
 		// Signal that the forks are now available to use!
 		if (signal_blocking(&forks[current_phil - 1]) == -1)
 		{
