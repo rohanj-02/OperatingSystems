@@ -3,10 +3,21 @@
 [org 0x7c00]
 
 main:
-	mov	bp, 0x8000 ; Initialise stack at 0x8000 address
+	; Interrupt to clear the screen
+	; AL = lines to scroll (0 = clear),
+	; BH = Background Color and Foreground color. 7h means white on black
+	; CH = Upper row number, CL = Left column number, DH = Lower row number, DL = Right column number 
+	mov ax, 0600h	
+	mov cx, 0
+	mov dl, 60h
+	mov dh, 40h
+	mov bh, 7h
+	int 10h
+
+	mov	bp, 8000h ; Initialise stack at 0x8000 address
 	mov	sp, bp
-	mov	bx, HELLO_WORLD
-	call	print_string
+	; mov	bx, HELLO_WORLD
+	; call	print_string
 	call	protected_switch
 	jmp $
 
@@ -17,39 +28,80 @@ main:
 ; Loads the gdt table and initialises cr0 register.
 ; Calls init_protected after finish
 protected_switch:
-	cli	;Clear interrupts because real mode IVT is useless after switching to protected mode
+	cli	; Clear interrupts because real mode IVT is useless after switching to protected mode
 	lgdt	[gdt_descriptor]
 	mov	eax, cr0
-	or	eax, 0x1	; Set first bit of CR0 register to 1 to switch to protected mode
+	or	eax, 1	; Set first bit of CR0 register to 1 to switch to protected mode
 	mov	cr0, eax
 	jmp	CODE_SEG:init_protected	; Make far jump to clear all instructions preloaded in real mode 
 
 [bits 32]
 init_protected:
-	mov	ax, DATA_SEG ; Update segment registers to the protected mode definitiion of data segment
+; Update segment registers to the protected mode definitiion of data segment
+	mov	ax, DATA_SEG
 	mov	ds, ax
 	mov	ss, ax
 	mov	fs, ax
 	mov	es, ax
 	mov	gs, ax
 
-	mov	ebp, 0x90000 ; Update stack pointers to a freely available space
+	mov	ebp, 90000h ; Update stack pointers to a freely available space
 	mov	esp, ebp
 
 	call	after_start
 
 after_start:
+	; Print hello world
 	mov	ebx, HELLO_WORLD_PROTECTED
+	mov	ecx, 0	; Print hello world to 1st row
+	mov	eax, 0	; Print hello world to 1st column
 	call	print_string_protected ; Call the print method 
-	mov	eax, 100100b
-	call	convert_int_to_string
+	
+	;Print "Cr0 contents:" 
+	mov	ebx, CR0_MSG
+	mov	ecx, 1	; Print to 2nd row
+	mov	eax, 0	; Print to 1st column
+	call	print_string_protected ; Call the print method 
+	
+	; Print the contents of Cr0
+	mov	eax, cr0
+	call	convert_binary_to_string
 	jmp	$	; Do not exit
 
-HELLO_WORLD:
-	db	"Hello World", 0
+; clear_screen:
+; 	mov	ebx, CLEAR_SCREEN ; ASCII character for space followed by a 0
+; 	mov	ecx, 1
+; 	mov	eax, 0
+; 	jmp	clear_screen_loop
+
+; clear_screen_loop:
+; 	; Nested loop to clear all rows and columns
+; 	call	clear_screen_inner_loop
+; 	add	ecx, 1
+; 	cmp	ecx, 25
+; 	jne	clear_screen_loop
+; 	ret
+
+; clear_screen_inner_loop:
+; 	mov	ebx, CLEAR_SCREEN ; ASCII character for space followed by a 0
+; 	call	print_string_protected
+; 	add	eax, 1
+; 	cmp	eax, 80
+; 	jne	clear_screen_inner_loop
+; 	ret
+
+; HELLO_WORLD:
+; 	db	"Hello World", 0
+
+; CLEAR_SCREEN:
+; 	db	" ", 0
 
 HELLO_WORLD_PROTECTED:
-	db	"Hello Protected World", 0
+	db	"Hello World", 0
+
+CR0_MSG:
+	db 	"Cr0 contents: ", 0
+
 ; Fill the binary till 510 bytes with 0s as placeholder after removing the size of the previous code
 ; $ represents the current address and $$ represents the start address
 times	510-($-$$) db 0

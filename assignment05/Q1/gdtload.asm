@@ -64,5 +64,5 @@ gdt_descriptor: ; 6 byte data structure with size of gdt in the first 2 bytes an
 	dd	gdt_init
 
 ; MACROS for easy access
-CODE_SEG equ gdt_code_decriptor - gdt_init
-DATA_SEG equ gdt_data_decriptor - gdt_init
+CODE_SEG	equ gdt_code_decriptor - gdt_init
+DATA_SEG 	equ gdt_data_decriptor - gdt_init

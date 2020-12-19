@@ -1,7 +1,7 @@
 [bits 16] ; Code to be compiled for 16 bit
 
 print_string: ; To call this, the string pointer should be in bx register.
-	pusha
+	pusha		; Pushes all the registers on the stack
 
 print_string_loop:
 	; Move ASCII code of character to print to al (ax lower 8 bytes)  
@@ -23,7 +23,7 @@ print_char:
 	ret
 
 print_string_exit:
-	popa
+	popa		; Pops all the registers off the stack
 	ret
 
 [bits 32] ; Code to be compiled for 32 bit
@@ -31,9 +31,21 @@ print_string_exit:
 VGA_MEMORY	equ	0xb8000	; Address at which VGA is stored
 TEXT_COLOUR	equ	0x0f		; Text settings white on black for VGA
 
-print_string_protected:		; To call this, the string pointer must be in ebx register
+; VGA_MEMORY is stored like : 0xb8000 + 2 * (row * 80 + col)
+
+print_string_protected:		; To call this, the string pointer must be in ebx register, and the row number to be kept in ecx register and column number on eax register
 	pusha
+	mov	esi, eax	; Save value of eax register to esi register because mul overwrites the contents of eax register
+	mov	eax, 80 	; Todo row * 80
+	mul	ecx		; eax -> row * 80 
+	mov	edx, esi	; Move column number to edx register
+	add	eax, edx	; eax -> row * 80 + col
+	mov	ecx, eax	; ecx -> row * 80 + col
+	mov	eax, 2	; To multiply ecx by 2
+	mul	ecx		; eax -> 2 * (row * 80 + col)
 	mov	edx, VGA_MEMORY
+	add	edx, eax	; edx -> 0xb8000 + 2 * (row * 80 + col)
+	mov	eax, 0
 	mov	ah, TEXT_COLOUR	; Upper byte of ax should be the font specifications and lower 8 bytes the ASCII code to be printed
 
 print_string_protected_loop:
@@ -51,6 +63,40 @@ print_string_protected_loop:
 print_string_protected_exit:
 	popa
 	ret
+
+convert_binary_to_string:	; Requires the number to be printed to be stored in eax
+	pusha
+	mov	ebx, 31		; 31 bytes because the string is initialised backwards. So storing starts from the back
+					; ebx stores the offset from CONVERTED_BIN to access the binary value 
+
+convert_binary_to_string_loop:
+	mov	edx, 0	; Dividend already in eax
+	mov	ecx, 2	; Divide ecx by 2 to get the Least significant bit (0 or 1)
+	div	ecx	
+	add	edx, 48	; Convert the number to its ASCII representation and store in edx
+
+	; Save the character to CONVERTED_BIN
+	mov	ecx, CONVERTED_BIN
+	add	ecx, ebx		; Generate the address to save by adding offset to CONVERTED_BIN
+	mov	[ecx], dl		; Save lower word of the edx register to address pointed by ecx
+	
+	; If the divisor value is 0 then end loop else subtract 1 from the offset and start again
+	cmp	eax, 0
+	je	convert_binary_to_string_exit
+	sub	ebx, 1
+	jmp	convert_binary_to_string_loop
+
+convert_binary_to_string_exit:
+	; Get the start of the converted binary string and store it in ebx
+	add	ebx, CONVERTED_BIN
+	mov	ecx, 1	; Print to row #1
+	mov	eax, 14	; Print to column 14 because "Cr0 contents: " take 14 spaces
+	call	print_string_protected
+	popa
+	ret
+
+CONVERTED_BIN:
+	times	33 db 0	; Reserve 32 bytes of space for storing the binary string and 1 for null terminator 
 
 convert_int_to_string:
 	pusha
@@ -75,6 +121,8 @@ convert_int_to_string_loop:
 
 convert_int_to_string_exit:
 	add	ebx, CONVERTED_INT
+	mov	ecx, 1
+	mov	eax, 0
 	call	print_string_protected
 	popa
 	ret
