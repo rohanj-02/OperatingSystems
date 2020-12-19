@@ -1,5 +1,6 @@
 [bits 16] ; Code to be compiled for 16 bit
 
+; Printing in real mode
 print_string: ; To call this, the string pointer should be in bx register.
 	pusha		; Pushes all the registers on the stack
 
@@ -64,8 +65,12 @@ print_string_protected_exit:
 	popa
 	ret
 
-convert_binary_to_string:	; Requires the number to be printed to be stored in eax
-	pusha
+convert_binary_to_string:	; Requires the number to be printed to be stored in eax, returns the pointer to the binary in eax
+	; Store the register values to be used on stack
+	push	ebx
+	push	ecx
+	push	edx
+
 	mov	ebx, 31		; 31 bytes because the string is initialised backwards. So storing starts from the back
 					; ebx stores the offset from CONVERTED_BIN to access the binary value 
 
@@ -89,10 +94,12 @@ convert_binary_to_string_loop:
 convert_binary_to_string_exit:
 	; Get the start of the converted binary string and store it in ebx
 	add	ebx, CONVERTED_BIN
-	mov	ecx, 1	; Print to row #1
-	mov	eax, 14	; Print to column 14 because "Cr0 contents: " take 14 spaces
-	call	print_string_protected
-	popa
+	; Return value in eax register so mov ebx -> eax
+	mov	eax, ebx
+	; Remove initial register values from stack
+	pop	edx
+	pop	ecx
+	pop	ebx
 	ret
 
 CONVERTED_BIN:

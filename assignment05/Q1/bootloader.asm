@@ -16,9 +16,10 @@ main:
 
 	mov	bp, 8000h ; Initialise stack at 0x8000 address
 	mov	sp, bp
+	; Code to print hello world in 16-bit real mode
 	; mov	bx, HELLO_WORLD
 	; call	print_string
-	call	protected_switch
+	call	protected_switch	; Switch to protected mode
 	jmp $
 
 %include "gdtload.asm"
@@ -29,13 +30,13 @@ main:
 ; Calls init_protected after finish
 protected_switch:
 	cli	; Clear interrupts because real mode IVT is useless after switching to protected mode
-	lgdt	[gdt_descriptor]
-	mov	eax, cr0
+	lgdt	[gdt_descriptor]		; Load global decriptor table defined in gdtload.asm
+	mov	eax, cr0	; Cannot directly change the value of cr0 register
 	or	eax, 1	; Set first bit of CR0 register to 1 to switch to protected mode
 	mov	cr0, eax
 	jmp	CODE_SEG:init_protected	; Make far jump to clear all instructions preloaded in real mode 
 
-[bits 32]
+[bits 32]	; Switch to 32 bit compilation
 init_protected:
 ; Update segment registers to the protected mode definitiion of data segment
 	mov	ax, DATA_SEG
@@ -65,8 +66,13 @@ after_start:
 	
 	; Print the contents of Cr0
 	mov	eax, cr0
-	call	convert_binary_to_string
-	jmp	$	; Do not exit
+	call	convert_binary_to_string	; Address to converted string stored in eax register
+	mov	ebx, eax	; print_string_protected wants address to string in ebx so mov eax -> ebx
+	mov	ecx, 1	; Print to row #1
+	mov	eax, 14	; Print to column 14 because "Cr0 contents: " take 14 spaces
+	call	print_string_protected
+
+	jmp	$	; Do not exit, wait forever; Means jump to current address
 
 ; clear_screen:
 ; 	mov	ebx, CLEAR_SCREEN ; ASCII character for space followed by a 0
