@@ -4,5 +4,8 @@ BINARYNAME = bootloader.bin
 compile:
 	nasm -f bin $(FILENAME) -o $(BINARYNAME)
 
-run:
+run: compile
 	qemu-system-x86_64 $(BINARYNAME)
+
+clean:
+	rm -f $(BINARYNAME)
