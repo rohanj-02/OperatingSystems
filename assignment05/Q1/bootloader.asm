@@ -14,7 +14,7 @@ main:
 	mov bh, 7h
 	int 10h
 
-	mov	bp, 8000h ; Initialise stack at 0x8000 address
+	mov	bp, 8000h ; Initialise stack at 8000h address
 	mov	sp, bp
 	; Code to print hello world in 16-bit real mode
 	; mov	bx, HELLO_WORLD

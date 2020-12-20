@@ -18,9 +18,9 @@ print_string_loop:
 ; To call this function, simply set al to the character to print
 print_char: 
 	; Move 0e or 10 to ah (ax high 8 bytes) to indicate teletype BIOS routine 
-	mov	ah, 0x0e
+	mov	ah, 0eh
 	; Interrupt to print
-	int	0x10
+	int	10h
 	ret
 
 print_string_exit:
@@ -32,7 +32,7 @@ print_string_exit:
 VGA_MEMORY	equ	0xb8000	; Address at which VGA is stored
 TEXT_COLOUR	equ	0x0f		; Text settings white on black for VGA
 
-; VGA_MEMORY is stored like : 0xb8000 + 2 * (row * 80 + col)
+; VGA_MEMORY is stored like : b8000h + 2 * (row * 80 + col)
 
 print_string_protected:		; To call this, the string pointer must be in ebx register, and the row number to be kept in ecx register and column number on eax register
 	pusha
@@ -45,7 +45,7 @@ print_string_protected:		; To call this, the string pointer must be in ebx regis
 	mov	eax, 2	; To multiply ecx by 2
 	mul	ecx		; eax -> 2 * (row * 80 + col)
 	mov	edx, VGA_MEMORY
-	add	edx, eax	; edx -> 0xb8000 + 2 * (row * 80 + col)
+	add	edx, eax	; edx -> b8000h + 2 * (row * 80 + col)
 	mov	eax, 0
 	mov	ah, TEXT_COLOUR	; Upper byte of ax should be the font specifications and lower 8 bytes the ASCII code to be printed
 

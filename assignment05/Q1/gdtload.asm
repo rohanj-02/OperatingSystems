@@ -37,25 +37,25 @@ gdt_null_descriptor:
 
 ; To describe the code segment
 gdt_code_decriptor:
-;Base = 0, Limit = 0xfffff, Flags: 1 for present, 00 for privilege, 1 for descriptor type -> 1001b
+;Base = 0, Limit = fffffh, Flags: 1 for present, 00 for privilege, 1 for descriptor type -> 1001b
 ;Flags for type: 1 for code, 0 for conforming, 1 for readable, 0 for accessed -> 1010b
 ;More flags: 1 for granularity, 1 for 32-bit default, 0 for 64-bit default, 0 for AVL -> 1100
 	dw	0xffff	;Limit (0-15)
-	dw	0x0		;Base (0-15)
-	db	0x0		;Base (16-23)
+	dw	0h		;Base (0-15)
+	db	0h		;Base (16-23)
 	db	10011010b	;Flags, Flags for type
 	db	11001111b	;More flags and Limit (16-19)
-	db	0x0		;Base (24-31)
+	db	0h		;Base (24-31)
 
 gdt_data_decriptor:
 ; Flags for type changed, rest is same
 ; Flags for type: 0 for code, 0 for expand down, 1 for writable, 0 for accessed ->  0010
 	dw	0xffff	;Limit (0-15)
-	dw	0x0		;Base (0-15)
-	db	0x0		;Base (16-23)
+	dw	0h		;Base (0-15)
+	db	0h		;Base (16-23)
 	db	10010010b	;Flags, Flags for type
 	db	11001111b	;More flags and Limit (16-19)
-	db	0x0		;Base (24-31
+	db	0h		;Base (24-31
 
 gdt_finish: ; To calculate size of the gdt
 
