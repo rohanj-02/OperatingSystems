@@ -2,9 +2,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <termios.h>
+#include <sys/file.h>
+
 #include "lock_functions.h"
 #include "editor.h"
-#include <termios.h>
 
 #define str_equal(a, b) (strcmp(a, b) == 0)
 #define MAX_BUFFER_SIZE 1024
@@ -55,7 +57,7 @@ int read_from_file(char *filename)
 
 	if (get_advisory_locks(fptr) != 0)
 	{
-		if (warn_user() != 0)
+		if (warn_user(fptr) != 0)
 		{
 			exit(0);
 		}
@@ -88,7 +90,7 @@ int write_file(FILE *fptr)
 {
 	if (get_advisory_locks(fptr) != 0)
 	{
-		if (warn_user() != 0)
+		if (warn_user(fptr) != 0)
 		{
 			exit(0);
 		}
