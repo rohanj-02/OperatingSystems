@@ -71,8 +71,8 @@ void init_terminal()
 	//	OPOST: Don't change \n to \r\n
 	raw_mode_state.c_iflag &= ~(IXON | ICRNL);
 	// raw_mode_state.c_iflag &= ~(IXON);
-	raw_mode_state.c_lflag &= ~(ICANON | ISIG | IEXTEN);
-	// raw_mode_state.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
+	// raw_mode_state.c_lflag &= ~(ICANON | ISIG | IEXTEN);
+	raw_mode_state.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
 	raw_mode_state.c_oflag &= ~(OPOST);
 	// VMIN stores the number of bytes needed for read to return
 	raw_mode_state.c_cc[VMIN] = 0;
@@ -88,42 +88,35 @@ void init_terminal()
 
 char get_key_input()
 {
-	// int bytes_read;
-	// char ch;
-	// while (bytes_read = read(STDIN_FILENO, &ch, 1) != 1)
-	// {
-	// 	if (bytes_read == -1)
-	// 	{
-	// 		perror("read(): error");
-	// 		exit(1);
-	// 	}
-	// }
-
+	terminal_state original, modified;
 	char c = 0;
-	// clear_screen();
-	while (c == 0)
+
+	if (tcgetattr(STDIN_FILENO, &original) == -1)
 	{
-		if (read(STDIN_FILENO, &c, 1) == -1)
-		{
-			perror("read(): error");
-			exit(1);
-		}
-		// printf("");
-		if (iscntrl(c))
-		{
-			// printf("%d\r\n", c);
-		}
-		else
-		{
-			// printf("%d ('%c')\r\n", c, c);
-		}
+		perror("tcgetattr(): error");
+		exit(1);
+	}
+	if (tcgetattr(STDIN_FILENO, &modified) == -1)
+	{
+		perror("tcgetattr(): error");
+		exit(1);
+	}
+
+	modified.c_iflag &= ~(IXON);
+	modified.c_lflag &= ~(ECHO | ICANON);
+
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &modified) == -1)
+	{
+		perror("tcsetattr(): error");
+		exit(1);
+	}
+
+	c = getchar();
+
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &original) == -1)
+	{
+		perror("tcsetattr(): error");
+		exit(1);
 	}
 	return c;
 }
-
-// int main()
-// {
-// 	init_terminal();
-// 	exit_function();
-// 	return 0;
-// }

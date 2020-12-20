@@ -4,7 +4,7 @@
 int get_advisory_locks(FILE *fptr)
 {
 	printf("Get advisory locks\r\n");
-	return 0;
+	return -1;
 }
 
 int release_advisory_locks(FILE *fptr)
@@ -24,7 +24,6 @@ int warn_user()
 	}
 	else
 	{
-
 		return -1;
 	}
 }

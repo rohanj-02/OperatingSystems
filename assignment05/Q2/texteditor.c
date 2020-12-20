@@ -9,8 +9,6 @@
 #define str_equal(a, b) (strcmp(a, b) == 0)
 #define MAX_BUFFER_SIZE 1024
 
-// terminal_state original_terminal_state;
-
 void print_error(char *err_msg)
 {
 	perror(err_msg);
@@ -86,14 +84,8 @@ int read_from_file(char *filename)
 	return 0;
 }
 
-int write_to_file(char *filename)
+int write_file(FILE *fptr)
 {
-	FILE *fptr;
-	if ((fptr = fopen(filename, "w")) == NULL)
-	{
-		print_error("fopen(): error");
-	}
-
 	if (get_advisory_locks(fptr) != 0)
 	{
 		if (warn_user() != 0)
@@ -101,8 +93,6 @@ int write_to_file(char *filename)
 			exit(0);
 		}
 	}
-
-	init_terminal();
 
 	char buffer[MAX_BUFFER_SIZE];
 	memset(buffer, 0, MAX_BUFFER_SIZE);
@@ -113,12 +103,14 @@ int write_to_file(char *filename)
 		char ch = get_key_input();
 		switch (ch)
 		{
+			//TODO Add backspace
 		case 0x1f & 'q':
 			if (fclose(fptr) != 0)
 			{
 				print_error("fclose(): error");
 			}
-			release_advisory_locks(fptr);
+			// Apparently no need of this??
+			// release_advisory_locks(fptr);
 			flag = 0;
 			break;
 		case 0x1f & 's':
@@ -128,7 +120,8 @@ int write_to_file(char *filename)
 			break;
 		default:
 			// printf("%c", ch);
-			fprintf(stdout, "%c", ch);
+			putchar(ch);
+			// fprintf(stdout, "%c", ch);
 			break;
 		}
 		if (i < MAX_BUFFER_SIZE)
@@ -138,14 +131,31 @@ int write_to_file(char *filename)
 		}
 	}
 
-	// todo RELEASE before fptr close or after? and same for getting it!
-	release_advisory_locks(fptr);
+	// release_advisory_locks(fptr);
 	// release lock
+	return 0;
+}
+
+int write_to_file(char *filename)
+{
+	FILE *fptr;
+	if ((fptr = fopen(filename, "w")) == NULL)
+	{
+		print_error("fopen(): error");
+	}
+	write_file(fptr);
 	return 0;
 }
 
 int append_to_file(char *filename)
 {
+
+	FILE *fptr;
+	if ((fptr = fopen(filename, "a")) == NULL)
+	{
+		print_error("fopen(): error");
+	}
+	write_file(fptr);
 }
 
 //append save delete flock

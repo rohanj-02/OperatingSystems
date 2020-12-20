@@ -1,1 +1,2 @@
-hdfhsfdhsd hsd hfshgf hg hsgf
+hello world , this is my first ever workspace? Idk what i am saying but i asure do love itThis will append to the last of file or EOF.
+This shall allow me to still edit the file, right?
