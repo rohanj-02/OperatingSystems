@@ -2,22 +2,16 @@
 	Roll No.: 2019095 */
 
 #include <pthread.h>
+#include <errno.h>
 #include <stdio.h>
-#include <stdlib.h>
-
-#define PHIL_COUNT 10000
-#define EAT_COUNT 10
-#define BOWL_COUNT 2
 
 typedef struct my_semaphore sem_b;
 
-//TODO Add non blocking functions, try_lock instead of lock
-// Semaphore functions
 struct my_semaphore
 {
 	pthread_mutex_t lock;
-	pthread_cond_t wait;
-	int value;
+	pthread_cond_t cond;
+	int count;
 	int num_waiters;
 };
 
@@ -25,18 +19,18 @@ struct my_semaphore
  * @brief Initialises a counting semaphore
  * 
  * @param my_sem The semaphore to be initialised of type my_semaphore
- * @param initial_value The initial value of the counting semaphore
+ * @param initial_count The initial count of the counting semaphore
  * @return int 0 on success and -1 on error with errno set
  */
-int init_sem(sem_b *my_sem, int initial_value)
+int init_sem(sem_b *my_sem, int initial_count)
 {
-	my_sem->value = initial_value;
+	my_sem->count = initial_count;
 	if (pthread_mutex_init(&(my_sem->lock), NULL) != 0)
 	{
 		perror("pthread_mutex_init(): error");
 		return -1;
 	}
-	if (pthread_cond_init(&(my_sem->wait), NULL) != 0)
+	if (pthread_cond_init(&(my_sem->cond), NULL) != 0)
 	{
 		perror("pthread_cond_init(): error");
 		return -1;
@@ -58,11 +52,11 @@ int signal_blocking(sem_b *s)
 		perror("pthread_mutex_lock(): error");
 		return -1;
 	}
-	s->value++;
+	s->count++;
 
-	if (s->value <= 0)
+	if (s->count <= 0)
 	{
-		if (pthread_cond_signal(&(s->wait)) != 0)
+		if (pthread_cond_signal(&(s->cond)) != 0)
 		{
 			perror("pthread_cond_signal(): error");
 			return -1;
@@ -90,18 +84,18 @@ int wait_blocking(sem_b *s)
 		perror("pthread_mutex_lock(): error");
 		return -1;
 	}
-	s->value--;
+	s->count--;
 
-	while (s->value < 0)
+	while (s->count < 0)
 	{
-		if (s->num_waiters >= (-1 * s->value))
+		if (s->num_waiters >= (-1 * s->count))
 		{
 			break;
 		}
 		else
 		{
 			s->num_waiters++;
-			if (pthread_cond_wait(&(s->wait), &(s->lock)) != 0)
+			if (pthread_cond_wait(&(s->cond), &(s->lock)) != 0)
 			{
 				perror("pthread_cond_wait(): error");
 				return -1;
@@ -120,19 +114,19 @@ int wait_blocking(sem_b *s)
 }
 
 /**
- * @brief Function to print the value of a semaphore of type my_semaphore.
+ * @brief Blocking Function to print the count of a semaphore of type my_semaphore.
  * 
- * @param s The semaphore whose value is to be printed
+ * @param s The semaphore whose count is to be printed
  * @return int 0 on success and -1 on error with errno set
  */
-int print_value_blocking(sem_b *s)
+int print_count_blocking(sem_b *s)
 {
 	if (pthread_mutex_lock(&(s->lock)) != 0)
 	{
 		perror("pthread_mutex_lock(): error");
 		return -1;
 	}
-	printf("Value of semaphore: %d\n", s->value);
+	printf("count of semaphore: %d\n", s->count);
 	if (pthread_mutex_unlock(&(s->lock)) != 0)
 	{
 		perror("pthread_mutex_unlock(): error");
@@ -141,155 +135,111 @@ int print_value_blocking(sem_b *s)
 	return 0;
 }
 
-// Global Variables
-
-sem_b forks[PHIL_COUNT];	   // Binary semaphore array for phil_run
-sem_b sauce_bowls[BOWL_COUNT]; // Semaphores for sauce_bowls
-
-// Helper functions
 /**
- * @brief Send wait signal to semaphore at index of the semaphore array
+ * @brief The function signal() or V() for the my_semaphore structure. It is a non blocking function.
  * 
- * @param sem_arr Array of semaphores
- * @param index Index to send wait() on
+ * @param s The semaphore to signal or increment
+ * @return int 0 on success and -1 on error with errno set
  */
-void get_sem_at_index(sem_b *sem_arr, int index)
+int signal_nonblocking(sem_b *s)
 {
-	if (wait_blocking(&sem_arr[index]) == -1)
+	int ret_val = 0;
+	if (ret_val = pthread_mutex_trylock(&(s->lock)) != 0)
 	{
-		printf("wait_blocking(): error");
-		exit(1);
-	}
-}
-
-/**
- * @brief Initialises a semphore array
- * 
- * @param sem_arr Array of semaphores
- * @param count Size of array
- */
-void initialise_sem_array(sem_b *sem_arr, int count)
-{
-	for (int i = 0; i < count; i++)
-	{
-		if (init_sem(&sem_arr[i], 1) == -1)
+		if (ret_val == EBUSY)
 		{
-			printf("init_sem(): error");
-			exit(1);
+			return EBUSY;
+		}
+		perror("pthread_mutex_trylock(): error");
+		return -1;
+	}
+	s->count++;
+
+	if (s->count <= 0)
+	{
+		if (pthread_cond_signal(&(s->cond)) != 0)
+		{
+			perror("pthread_cond_signal(): error");
+			return -1;
 		}
 	}
+
+	if (pthread_mutex_unlock(&(s->lock)) != 0)
+	{
+		perror("pthread_mutex_unlock(): error");
+		return -1;
+	}
+	return 0;
 }
 
 /**
- * @brief The function which each philosopher runs 
+ * @brief The function wait() or P() for the my_semaphore structure. It is a non blocking function.
  * 
- * @param number Philosopher index number
- * @return void* 
+ * @param s The semaphore to wait or decrement
+ * @return int 0 on success and -1 on error with errno set
  */
-void *phil_run(void *number)
+int wait_nonblocking(sem_b *s)
 {
-	int current_phil = *((int *)number);
-	int right_fork = (current_phil == PHIL_COUNT) ? 0 : current_phil;
-	int curr_eat_count = 0;
-	// Loop till philosopher hasn't eaten enough times
-	do
+	// fprintf(stderr, "In wait non block \n");
+	int ret_val = 0;
+	ret_val = pthread_mutex_trylock(&(s->lock));
+	if (ret_val != 0)
 	{
-		//* Entry Section
-		// Changing the order of getting the forks/chopsticks of half the philosophers prevents cyclic deadlock on getting forks
-		if (current_phil % 2 != 0)
+		// fprintf(stderr, "Did not get sem non block :%d\n", ret_val);
+		if (ret_val == EBUSY)
 		{
-			// Odd philosophers grab the right fork first and then the left one.
-			get_sem_at_index(forks, right_fork);
-			printf("Philosopher %d picked up fork %d\n", current_phil, right_fork + 1);
-
-			get_sem_at_index(forks, current_phil - 1);
-			printf("Philosopher %d picked up fork %d\n", current_phil, current_phil);
+			return EBUSY;
 		}
 		else
 		{
-			// Even philosophers grab the left fork first and then the right one.
-			get_sem_at_index(forks, current_phil - 1);
-			printf("Philosopher %d picked up fork %d\n", current_phil, current_phil);
-
-			get_sem_at_index(forks, right_fork);
-			printf("Philosopher %d picked up fork %d\n", current_phil, right_fork + 1);
+			perror("pthread_mutex_trylock(): error");
+			return -1;
 		}
+	}
+	// fprintf(stderr, "Got sem of non block \n");
+	s->count--;
 
-		//* Critical Section
-		// Get both bowls one after the other to prevent deadlock
-		for (int i = 0; i < BOWL_COUNT; i++)
+	if (s->count < 0)
+	{
+		if (pthread_cond_wait(&(s->cond), &(s->lock)) != 0)
 		{
-			get_sem_at_index(sauce_bowls, i);
-			// print_value_blocking(&sauce_bowls[i]);
-			printf("Philosopher %d picked up bowl %d\n", current_phil, i + 1);
+			perror("pthread_cond_wait(): error");
+			return -1;
 		}
+	}
 
-		// Philosopher is eating!
-		printf("Philosopher %d is eating!\n", current_phil);
+	if (pthread_mutex_unlock(&(s->lock)) != 0)
+	{
+		perror("pthread_mutex_unlock(): error");
+		return -1;
+	}
 
-		//* Exit Section
-		// Signal that bowls are available to take
-		for (int i = BOWL_COUNT - 1; i >= 0; i--)
-		{
-			if (signal_blocking(&sauce_bowls[i]) == -1)
-			{
-				printf("signal_blocking(): error");
-				exit(1);
-			}
-		}
-
-		// Signal that the forks are now available to use!
-		if (signal_blocking(&forks[current_phil - 1]) == -1)
-		{
-			printf("signal_blocking(): error");
-			exit(1);
-		}
-		if (signal_blocking(&forks[right_fork]) == -1)
-		{
-			printf("signal_blocking(): error");
-			exit(1);
-		}
-
-		//Increase the number of times the philosopher has eaten
-		curr_eat_count++;
-
-	} while (curr_eat_count != EAT_COUNT);
-
-	printf("Philosopher %d is done!\n", current_phil);
+	return 0;
 }
 
-int main(void)
+/**
+ * @brief Non blocking Function to print the count of a semaphore of type my_semaphore.
+ * 
+ * @param s The semaphore whose count is to be printed
+ * @return int 0 on success and -1 on error with errno set
+ */
+int print_count_nonblocking(sem_b *s)
 {
-	pthread_t philosophers[PHIL_COUNT];
-
-	// Initialise semaphores
-	initialise_sem_array(forks, PHIL_COUNT);
-	initialise_sem_array(sauce_bowls, BOWL_COUNT);
-
-	int NUMBERS[PHIL_COUNT];
-	for (int i = 0; i < PHIL_COUNT; i++)
+	int ret_val = 0;
+	if (ret_val = pthread_mutex_trylock(&(s->lock)) != 0)
 	{
-		NUMBERS[i] = i + 1;
-	}
-
-	// Create threads and then join them
-	for (int i = 0; i < PHIL_COUNT; i++)
-	{
-		if (pthread_create(&philosophers[i], NULL, (void *)phil_run, (void *)&NUMBERS[i]) != 0)
+		if (ret_val == EBUSY)
 		{
-			perror("pthread_create(): error");
-			// Don't exit, let other threads run.
+			return EBUSY;
 		}
+		perror("pthread_mutex_lock(): error");
+		return -1;
 	}
-
-	for (int i = 0; i < PHIL_COUNT; i++)
+	printf("count of semaphore: %d\n", s->count);
+	if (pthread_mutex_unlock(&(s->lock)) != 0)
 	{
-		if (pthread_join(philosophers[i], NULL) != 0)
-		{
-			perror("pthread_join(): error");
-			// Don't exit, Let the other threads join
-		}
+		perror("pthread_mutex_unlock(): error");
+		return -1;
 	}
-
 	return 0;
 }

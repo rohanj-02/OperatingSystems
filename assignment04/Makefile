@@ -1,5 +1,11 @@
-default:
-	gcc semaphore.c -pthread -o sem.o
+FILENAME = main.c semaphore.c
+BINARY_NAME = a.out
+
+compile:
+	gcc $(FILENAME) -pthread -o $(BINARY_NAME)
+
+run: compile
+	./$(BINARY_NAME)
 
 clean:
-	rm -f sem.o
+	rm -f $(BINARY_NAME)
