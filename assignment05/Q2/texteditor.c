@@ -6,17 +6,19 @@
 #include <sys/file.h>
 
 #include "lock_functions.h"
-#include "editor.h"
 
-#define str_equal(a, b) (strcmp(a, b) == 0)
+#define str_equal(a, b) (strcmp(a, b) == 0) // To check if strings are equal
 #define MAX_BUFFER_SIZE 1024
+typedef struct termios terminal_state;
 
+// For printing error handling messages and exiting the program
 void print_error(char *err_msg)
 {
 	perror(err_msg);
 	exit(1);
 }
 
+// Hang the process by waiting for user input to demonstrate file locking with read mode
 int wait_for_close()
 {
 	while (1)
@@ -26,27 +28,72 @@ int wait_for_close()
 		scanf("%s", buffer);
 		if (buffer[0] == 'q')
 		{
-			return 0;
+			return 0; //User wants to quit
 		}
 	}
 }
 
+// Saves the data on the file character by character
 int save_file(FILE *fptr, char *data)
 {
 	int length = strlen(data);
 	for (int i = 0; i < length; i++)
 	{
-		fprintf(fptr, "%c", data[i]);
+		if (fprintf(fptr, "%c", data[i]) < 1)
+		{
+			print_error("fprintf(): error");
+		}
 	}
-	data = "";
-	return 0;
+	return 0; // Saved successfully
 }
 
-int confirm_exit()
+// Get one character of input from the terminal
+char get_key_input()
 {
-	return 0;
+	// termios used to get inputs such as crtl+q and ctrl+s for quit and save
+	terminal_state original, modified;
+	char ch = 0;
+
+	// Get terminal attributes to restore after taking input
+	if (tcgetattr(STDIN_FILENO, &original) == -1)
+	{
+		perror("tcgetattr(): error");
+		exit(1);
+	}
+	if (tcgetattr(STDIN_FILENO, &modified) == -1)
+	{
+		perror("tcgetattr(): error");
+		exit(1);
+	}
+
+	// Change terminal attributes such that:
+	// ICANON: Byte by byte input instead of line by line input
+	// ECHO: The terminal doesn't print to stdout whatever it receives to stdin
+	// IXON: Disabling Ctrl + s and Ctrl + q
+	modified.c_iflag &= ~(IXON);
+	modified.c_lflag &= ~(ECHO | ICANON);
+
+	// Set terminal attributes to modified attributes
+	// TCSAFLUSH to ignore anything already present in the stdin buffer
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &modified) == -1)
+	{
+		perror("tcsetattr(): error");
+		exit(1);
+	}
+
+	ch = getchar();
+
+	// Restore terminal attributes to original
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &original) == -1)
+	{
+		perror("tcsetattr(): error");
+		exit(1);
+	}
+
+	return ch;
 }
 
+//
 int read_from_file(char *filename)
 {
 	FILE *fptr;
@@ -63,7 +110,6 @@ int read_from_file(char *filename)
 		}
 	}
 
-	// What does getc return on error?
 	char ch = getc(fptr);
 	while (ch != EOF)
 	{
@@ -73,16 +119,14 @@ int read_from_file(char *filename)
 
 	printf("\n");
 	wait_for_close();
-	// wait for input
+
+	release_advisory_locks(fptr);
 
 	if (fclose(fptr) != 0)
 	{
 		print_error("fclose(): error");
 	}
 
-	// todo RELEASE before fptr close or after? and same for getting it!
-	release_advisory_locks(fptr);
-	// release lock
 	return 0;
 }
 
@@ -107,13 +151,9 @@ int write_file(FILE *fptr)
 		{
 			//TODO Add backspace
 		case 0x1f & 'q':
-			if (fclose(fptr) != 0)
-			{
-				print_error("fclose(): error");
-			}
-			// Apparently no need of this??
-			// release_advisory_locks(fptr);
+			release_advisory_locks(fptr);
 			flag = 0;
+			return 0;
 			break;
 		case 0x1f & 's':
 			save_file(fptr, buffer);
@@ -121,9 +161,7 @@ int write_file(FILE *fptr)
 			memset(buffer, 0, MAX_BUFFER_SIZE);
 			break;
 		default:
-			// printf("%c", ch);
 			putchar(ch);
-			// fprintf(stdout, "%c", ch);
 			break;
 		}
 		if (i < MAX_BUFFER_SIZE)
@@ -132,9 +170,6 @@ int write_file(FILE *fptr)
 			i++;
 		}
 	}
-
-	// release_advisory_locks(fptr);
-	// release lock
 	return 0;
 }
 
@@ -145,7 +180,20 @@ int write_to_file(char *filename)
 	{
 		print_error("fopen(): error");
 	}
-	write_file(fptr);
+
+	if (write_file(fptr) == 0)
+	{
+		if (fclose(fptr) == -1)
+		{
+			print_error("fclose(): error");
+		}
+	}
+	else
+	{
+		printf("Error in writing to file!");
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -157,7 +205,21 @@ int append_to_file(char *filename)
 	{
 		print_error("fopen(): error");
 	}
-	write_file(fptr);
+
+	if (write_file(fptr) == 0)
+	{
+		if (fclose(fptr) == -1)
+		{
+			print_error("fclose(): error");
+		}
+	}
+	else
+	{
+		printf("Error in writing to file!");
+		return -1;
+	}
+
+	return 0;
 }
 
 //append save delete flock

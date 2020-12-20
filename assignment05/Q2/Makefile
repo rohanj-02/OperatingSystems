@@ -1,4 +1,4 @@
-FILENAME = texteditor.c lock_functions.c editor.c
+FILENAME = texteditor.c lock_functions.c
 BINARY_NAME = run_editor.o
 
 compile:
