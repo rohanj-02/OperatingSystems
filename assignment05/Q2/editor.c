@@ -8,6 +8,20 @@ typedef struct termios terminal_state;
 
 terminal_state original_terminal_state;
 
+// void clear_screen()
+// {
+// 	if (write(STDOUT_FILENO, "\x1b[2J", 4) == -1)
+// 	{
+// 		perror("write(): error");
+// 		exit(1);
+// 	}
+// 	if (write(STDOUT_FILENO, "\x1b[H", 3) == -1)
+// 	{
+// 		perror("write(): error");
+// 		exit(1);
+// 	}
+// }
+
 /**
  * @brief To restore the state of the terminal before the function ends
  * 
@@ -15,7 +29,7 @@ terminal_state original_terminal_state;
 void exit_function()
 {
 	printf("Exiting text editor now \r\n");
-	clear_screen();
+	// clear_screen();
 	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &original_terminal_state) == -1)
 	{
 		perror("tcsetattr(): error");
@@ -56,7 +70,9 @@ void init_terminal()
 	//	ICRNL: To differentiate between carriage return and new line
 	//	OPOST: Don't change \n to \r\n
 	raw_mode_state.c_iflag &= ~(IXON | ICRNL);
-	raw_mode_state.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
+	// raw_mode_state.c_iflag &= ~(IXON);
+	raw_mode_state.c_lflag &= ~(ICANON | ISIG | IEXTEN);
+	// raw_mode_state.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
 	raw_mode_state.c_oflag &= ~(OPOST);
 	// VMIN stores the number of bytes needed for read to return
 	raw_mode_state.c_cc[VMIN] = 0;
@@ -70,47 +86,44 @@ void init_terminal()
 	}
 }
 
-void clear_screen()
+char get_key_input()
 {
-	if (write(STDOUT_FILENO, "\x1b[2J", 4) == -1)
-	{
-		perror("write(): error");
-		exit(1);
-	}
-	if (write(STDOUT_FILENO, "\x1b[H", 3) == -1)
-	{
-		perror("write(): error");
-		exit(1);
-	}
-}
+	// int bytes_read;
+	// char ch;
+	// while (bytes_read = read(STDIN_FILENO, &ch, 1) != 1)
+	// {
+	// 	if (bytes_read == -1)
+	// 	{
+	// 		perror("read(): error");
+	// 		exit(1);
+	// 	}
+	// }
 
-int main()
-{
-	init_terminal();
-	char c;
-	while (1)
+	char c = 0;
+	// clear_screen();
+	while (c == 0)
 	{
-		char c = '\0';
-		clear_screen();
 		if (read(STDIN_FILENO, &c, 1) == -1)
 		{
 			perror("read(): error");
 			exit(1);
 		}
+		// printf("");
 		if (iscntrl(c))
 		{
-			printf("%d\r\n", c);
+			// printf("%d\r\n", c);
 		}
 		else
 		{
-			printf("%d ('%c')\r\n", c, c);
-		}
-		// Ctrl + q stops the editor
-		if (c == (0x1f & 'q'))
-		{
-			break;
+			// printf("%d ('%c')\r\n", c, c);
 		}
 	}
-	// exit_function();
-	return 0;
+	return c;
 }
+
+// int main()
+// {
+// 	init_terminal();
+// 	exit_function();
+// 	return 0;
+// }
