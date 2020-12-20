@@ -14,7 +14,6 @@
 #define MAX_BUFFER_SIZE 1024
 typedef struct termios terminal_state;
 
-//TODO add print statement of Ctrl+q is quit and Ctrl + s is save
 // For printing error handling messages and exiting the program
 void print_error(char *err_msg)
 {
@@ -97,6 +96,19 @@ char get_key_input()
 	return ch;
 }
 
+// Print the contents of the file
+int print_file_contents(FILE *fptr)
+{
+	char ch = getc(fptr);
+	while (ch != EOF)
+	{
+		printf("%c", ch);
+		ch = getc(fptr);
+	}
+
+	return 0;
+}
+
 // Reads data from file and prints it to stdout
 int read_from_file(char *filename)
 {
@@ -117,12 +129,7 @@ int read_from_file(char *filename)
 	}
 
 	// Print the file on stdout
-	char ch = getc(fptr);
-	while (ch != EOF)
-	{
-		printf("%c", ch);
-		ch = getc(fptr);
-	}
+	print_file_contents(fptr);
 
 	printf("\n");
 	// Wait for the user to close the program to test the file locking capabilities of the editor
@@ -140,17 +147,8 @@ int read_from_file(char *filename)
 }
 
 // Writes data to file pointed by fptr
-int write_file(FILE *fptr)
+int file_write(FILE *fptr)
 {
-	// Get the advisory lock and if failed then warn the user to get a shared lock
-	if (get_advisory_locks(fptr) != 0)
-	{
-		if (warn_user(fptr) != 0)
-		{
-			exit(0);
-		}
-	}
-
 	char buffer[MAX_BUFFER_SIZE];
 	memset(buffer, 0, MAX_BUFFER_SIZE);
 	int i = 0;
@@ -162,7 +160,6 @@ int write_file(FILE *fptr)
 
 		switch (ch)
 		{
-			//TODO Add backspace
 		// If input = ctrl + q then quit the program
 		case 0x1f & 'q':
 			release_advisory_locks(fptr);
@@ -193,17 +190,28 @@ int write_file(FILE *fptr)
 }
 
 // Menu option of writing to file. It overwrites the given file.
-int write_to_file(char *filename)
+int write_to_file(char *filename, char *mode)
 {
 	FILE *fptr;
-	// TODo change to read write mode so fopen() doesn't destroy file
-	if ((fptr = fopen(filename, "w")) == NULL)
+	if ((fptr = fopen(filename, mode)) == NULL)
 	{
 		print_error("fopen(): error");
 	}
 
+	// Get the advisory lock and if failed then warn the user to get a shared lock
+	if (get_advisory_locks(fptr) != 0)
+	{
+		if (warn_user(fptr) != 0)
+		{
+			exit(0);
+		}
+	}
+
+	// Should always be null
+	print_file_contents(fptr);
+
 	// Close fptr if write to file successful
-	if (write_file(fptr) == 0)
+	if (file_write(fptr) == 0)
 	{
 		if (fclose(fptr) == -1)
 		{
@@ -219,32 +227,7 @@ int write_to_file(char *filename)
 	return 0;
 }
 
-// Menu option of appending text to file
-int append_to_file(char *filename)
-{
-	FILE *fptr;
-	if ((fptr = fopen(filename, "a")) == NULL)
-	{
-		print_error("fopen(): error");
-	}
-
-	// Close fptr if write to file successful
-	if (write_file(fptr) == 0)
-	{
-		if (fclose(fptr) == -1)
-		{
-			print_error("fclose(): error");
-		}
-	}
-	else
-	{
-		printf("Error in writing to file!");
-		return -1;
-	}
-
-	return 0;
-}
-
+// Delete the file from filesystem
 int delete_file(char *filename)
 {
 	FILE *fptr;
@@ -275,11 +258,11 @@ int menu(int option, char *filename)
 		break;
 	case 2:
 		printf("Write mode. Replaces the content of the file.\nPress Ctrl + Q for quitting and Ctrl + s for saving file!\n");
-		write_to_file(filename);
+		write_to_file(filename, "w+");
 		break;
 	case 3:
 		printf("Appends the data to EOF!\nPress Ctrl + Q for quitting and Ctrl + s for saving file!\n");
-		append_to_file(filename);
+		write_to_file(filename, "a+");
 		break;
 	case 4:
 		printf("Deleting file...\n");
