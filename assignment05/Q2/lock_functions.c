@@ -7,15 +7,16 @@
 #include <errno.h>
 #include <stdlib.h>
 
-// Get exclusive non blocking advisory lock on file and if cannot get then return -1
+// Get advisory lock on file and if cannot get then return -1
 int get_advisory_locks(FILE *fptr)
 {
 	// Fileno returns the file descriptor from a FILE* struct object
 	int fd = fileno(fptr);
 	// LOCK_EX is for exclusive and LOCK_NB for non blocking
+	// LOCK_EX to test if others are using a lock on this file or not
 	if (flock(fd, LOCK_EX | LOCK_NB) == -1)
 	{
-		if (errno == EWOULDBLOCK) // EWOULDBLOCK is thrown when the file is locksed and LOCK_NB flag is selected
+		if (errno == EWOULDBLOCK) // EWOULDBLOCK is thrown when the file is locked and LOCK_NB flag is selected
 		{
 			return -1; // Failure to acquire lock
 		}
@@ -24,6 +25,17 @@ int get_advisory_locks(FILE *fptr)
 			perror("flock(): error");
 			exit(1);
 		}
+	}
+	else
+	{
+		// Change lock to shared lock if granted exclusive lock
+		if (flock(fd, LOCK_SH) == -1)
+		{
+
+			perror("flock(): error");
+			exit(1);
+		}
+		printf("User given shared lock.\n");
 	}
 	return 0; //Lock acquired successfully
 }
@@ -49,10 +61,10 @@ int warn_user(FILE *fptr)
 	char buffer[10];
 
 	scanf("%s", buffer);
-	int fd = fileno(fptr);
 
 	if (buffer[0] == 'y')
 	{
+		int fd = fileno(fptr);
 		// LOCK_SH is for shared lock
 		if (flock(fd, LOCK_SH) == -1)
 		{
