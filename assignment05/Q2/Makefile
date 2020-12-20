@@ -1,3 +1,6 @@
+# 	Name: Rohan Jain
+# 	Roll No: 2019095 
+
 FILENAME = texteditor.c lock_functions.c
 BINARY_NAME = run_editor.o
 

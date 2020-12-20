@@ -1,3 +1,6 @@
+/*	Name: Rohan Jain
+	Roll No: 2019095 */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -242,39 +245,106 @@ int append_to_file(char *filename)
 	return 0;
 }
 
+int delete_file(char *filename)
+{
+	FILE *fptr;
+	if ((fptr = fopen(filename, "w")) == NULL)
+	{
+		print_error("fopen(): error");
+	}
+	if (remove(filename) == 0)
+	{
+		printf("File Deleted!\n");
+	}
+	else
+	{
+		print_error("remove(): error");
+	}
+
+	return 0;
+}
+
+// Menu option to choose what to do with file
+int menu(int option, char *filename)
+{
+	switch (option)
+	{
+	case 1:
+		printf("Read mode\n");
+		read_from_file(filename);
+		break;
+	case 2:
+		printf("Write mode. Replaces the content of the file.\nPress Ctrl + Q for quitting and Ctrl + s for saving file!\n");
+		write_to_file(filename);
+		break;
+	case 3:
+		printf("Appends the data to EOF!\nPress Ctrl + Q for quitting and Ctrl + s for saving file!\n");
+		append_to_file(filename);
+		break;
+	case 4:
+		printf("Deleting file...\n");
+		delete_file(filename);
+		break;
+	case 5:
+		exit(0);
+	default:
+		exit(1);
+	}
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	// Usage of the program
 	// ./run_editor.o read filename
 	// ./run_editor.o append filename
 	// ./run_editor.o write filename
+	// ./run_editor.o delete filename
 	if (argc < 3)
 	{
-		fprintf(stderr, "Invalid arguments!\n");
-		exit(1);
-	}
+		int i = 0;
 
-	// Menu
-	// Enter ctrl + q to stop process for write/append, and q to stop process for read
-	if (str_equal(argv[1], "read"))
-	{
-		printf("Read mode\n");
-		read_from_file(argv[2]);
-	}
-	else if (str_equal(argv[1], "write"))
-	{
-		printf("Write mode. Replaces the content of the file\n");
-		write_to_file(argv[2]);
-	}
-	else if (str_equal(argv[1], "append"))
-	{
-		printf("Appends the data to EOF!\n");
-		append_to_file(argv[2]);
+		// Menu
+		// Enter ctrl + q to stop process for write/append, and q to stop process for read
+		do
+		{
+			printf("\n1. Read\n2. Write\n3. Append\n4. Delete\n5. Exit\n");
+			scanf("%d", &i);
+			if (i == 5)
+			{
+				exit(0);
+			}
+			char filename[256];
+			printf("Enter filename: ");
+			scanf("%s", filename);
+			menu(i, filename);
+		} while (i < 5 && i > 0);
 	}
 	else
 	{
-		fprintf(stderr, "Invalid arguments!\n");
-		exit(1);
+		if (str_equal(argv[1], "read"))
+		{
+			menu(1, argv[2]);
+		}
+		else if (str_equal(argv[1], "write"))
+		{
+			menu(2, argv[2]);
+		}
+		else if (str_equal(argv[1], "append"))
+		{
+			menu(3, argv[2]);
+		}
+		else if (str_equal(argv[1], "delete"))
+		{
+			menu(4, argv[2]);
+		}
+		else
+		{
+			fprintf(stderr, "Invalid arguments!\n");
+			exit(1);
+		}
 	}
+
 	return 0;
 }
