@@ -7,6 +7,6 @@
 
 int get_advisory_locks(FILE *fptr);
 int release_advisory_locks(FILE *fptr);
-int warn_user();
+int warn_user(FILE *fptr);
 
 #endif

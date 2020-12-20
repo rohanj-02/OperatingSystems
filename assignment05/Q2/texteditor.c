@@ -11,6 +11,7 @@
 #define MAX_BUFFER_SIZE 1024
 typedef struct termios terminal_state;
 
+//TODO add print statement of Ctrl+q is quit and Ctrl + s is save
 // For printing error handling messages and exiting the program
 void print_error(char *err_msg)
 {
@@ -93,15 +94,17 @@ char get_key_input()
 	return ch;
 }
 
-//
+// Reads data from file and prints it to stdout
 int read_from_file(char *filename)
 {
 	FILE *fptr;
+	// Open file in read mode
 	if ((fptr = fopen(filename, "r")) == NULL)
 	{
 		print_error("fopen(): error");
 	}
 
+	// Get the advisory lock and if failed then warn the user to get a shared lock
 	if (get_advisory_locks(fptr) != 0)
 	{
 		if (warn_user(fptr) != 0)
@@ -110,6 +113,7 @@ int read_from_file(char *filename)
 		}
 	}
 
+	// Print the file on stdout
 	char ch = getc(fptr);
 	while (ch != EOF)
 	{
@@ -118,8 +122,10 @@ int read_from_file(char *filename)
 	}
 
 	printf("\n");
+	// Wait for the user to close the program to test the file locking capabilities of the editor
 	wait_for_close();
 
+	// Release locks and then close the file descriptor
 	release_advisory_locks(fptr);
 
 	if (fclose(fptr) != 0)
@@ -130,8 +136,10 @@ int read_from_file(char *filename)
 	return 0;
 }
 
+// Writes data to file pointed by fptr
 int write_file(FILE *fptr)
 {
+	// Get the advisory lock and if failed then warn the user to get a shared lock
 	if (get_advisory_locks(fptr) != 0)
 	{
 		if (warn_user(fptr) != 0)
@@ -146,41 +154,52 @@ int write_file(FILE *fptr)
 	int flag = 1;
 	while (flag)
 	{
+		// Get input
 		char ch = get_key_input();
+
 		switch (ch)
 		{
 			//TODO Add backspace
+		// If input = ctrl + q then quit the program
 		case 0x1f & 'q':
 			release_advisory_locks(fptr);
 			flag = 0;
 			return 0;
 			break;
+		// If input = ctrl + s then save the buffer and reinitialize it
 		case 0x1f & 's':
 			save_file(fptr, buffer);
 			i = 0;
 			memset(buffer, 0, MAX_BUFFER_SIZE);
 			break;
+		// Default: Print the character on stdout
 		default:
 			putchar(ch);
 			break;
 		}
+
+		// Add character to buffer if buffer not overflown
 		if (i < MAX_BUFFER_SIZE)
 		{
 			buffer[i] = ch;
 			i++;
 		}
 	}
+
 	return 0;
 }
 
+// Menu option of writing to file. It overwrites the given file.
 int write_to_file(char *filename)
 {
 	FILE *fptr;
+	// TODo change to read write mode so fopen() doesn't destroy file
 	if ((fptr = fopen(filename, "w")) == NULL)
 	{
 		print_error("fopen(): error");
 	}
 
+	// Close fptr if write to file successful
 	if (write_file(fptr) == 0)
 	{
 		if (fclose(fptr) == -1)
@@ -197,15 +216,16 @@ int write_to_file(char *filename)
 	return 0;
 }
 
+// Menu option of appending text to file
 int append_to_file(char *filename)
 {
-
 	FILE *fptr;
 	if ((fptr = fopen(filename, "a")) == NULL)
 	{
 		print_error("fopen(): error");
 	}
 
+	// Close fptr if write to file successful
 	if (write_file(fptr) == 0)
 	{
 		if (fclose(fptr) == -1)
@@ -222,22 +242,20 @@ int append_to_file(char *filename)
 	return 0;
 }
 
-//append save delete flock
 int main(int argc, char **argv)
 {
-	// ./texteditor.o read "filename"
-	// ./texteditor.o append "filename"
-	// ./texteditor.o write "filename"
+	// Usage of the program
+	// ./run_editor.o read filename
+	// ./run_editor.o append filename
+	// ./run_editor.o write filename
 	if (argc < 3)
 	{
 		fprintf(stderr, "Invalid arguments!\n");
 		exit(1);
 	}
+
 	// Menu
 	// Enter ctrl + q to stop process for write/append, and q to stop process for read
-	// For advisory locks: The file is open in another process, are you sure you want to modify its contents? (y/n)
-	// Open append and write in termios
-	// Read just like that
 	if (str_equal(argv[1], "read"))
 	{
 		printf("Read mode\n");
